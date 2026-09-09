@@ -56,7 +56,7 @@ Verificación en **tres capas** (la tercera es la crítica):
 
 ## 3. Funciones auxiliares de autorización (esquema `app`)
 
-Definidas en [`supabase/migrations/0008_auth_helpers.sql`](../supabase/migrations/0008_auth_helpers.sql). Todas `STABLE`; las que consultan tablas, `SECURITY DEFINER` con `search_path` fijo.
+Definidas en [`supabase/migrations/20260909120108_auth_helpers.sql`](../supabase/migrations/20260909120108_auth_helpers.sql). Todas `STABLE`; las que consultan tablas, `SECURITY DEFINER` con `search_path` fijo.
 
 | Función | Devuelve | Uso |
 |---|---|---|
@@ -72,7 +72,7 @@ Definidas en [`supabase/migrations/0008_auth_helpers.sql`](../supabase/migration
 
 ## 4. Catálogo de políticas RLS (resumen)
 
-Detalle ejecutable en [`supabase/migrations/0009_rls_policies.sql`](../supabase/migrations/0009_rls_policies.sql) y explicación tabla por tabla en [`RLS_POLICIES.md`](RLS_POLICIES.md).
+Detalle ejecutable en [`supabase/migrations/20260909120109_rls_policies.sql`](../supabase/migrations/20260909120109_rls_policies.sql) y explicación tabla por tabla en [`RLS_POLICIES.md`](RLS_POLICIES.md).
 
 | Tabla | SELECT | INSERT | UPDATE | DELETE | Caso(s) que defiende |
 |---|---|---|---|---|---|

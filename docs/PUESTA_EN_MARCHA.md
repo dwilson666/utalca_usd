@@ -22,7 +22,7 @@ Reiniciar la terminal. Verificar: `node -v`, `docker -v`, `supabase -v`, `pnpm -
 ```powershell
 cd rat_institucional
 supabase start            # levanta Postgres + Auth + Studio (Docker)
-supabase db reset         # aplica migrations 0001–0013 + seed.sql
+supabase db reset         # aplica las 13 migraciones + seed.sql
 supabase test db          # ► corre supabase/tests/authz_matrix_test.sql (10 casos)
 ```
 
@@ -80,7 +80,7 @@ Esto valida todo **sin instalar nada en tu equipo**.
 ### 2. Proyecto Supabase (capa gratuita)
 
 1. Crear proyecto en [supabase.com](https://supabase.com) (región `South America (São Paulo)` — la más cercana; ver nota de residencia de datos en el contrato §D7).
-2. En el repo: `supabase link --project-ref <ref>` y `supabase db push` (necesita la CLI una vez; o pegar las migraciones en el **SQL Editor** del dashboard en orden 0001→0013, luego `seed.sql`).
+2. En el repo: `supabase link --project-ref <ref>` y `supabase db push` (necesita la CLI una vez; o pegar las migraciones en el **SQL Editor** del dashboard en orden por nombre, luego `seed.sql`).
 3. Dashboard → Authentication → Providers: deshabilitar "Enable email signup"; Authentication → MFA: habilitar TOTP.
 4. Copiar `URL` y `anon key` del proyecto.
 

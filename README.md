@@ -9,7 +9,7 @@ Stack (capa gratuita): **Supabase** (PostgreSQL + Auth + RLS + Storage + Edge Fu
 | Componente | Estado |
 |---|---|
 | Contrato de autorización y segregación | ✅ [`docs/Fase4a_Contrato_Autorizacion.md`](docs/Fase4a_Contrato_Autorizacion.md) |
-| Migraciones PostgreSQL (esquema + RLS + funciones + triggers) | ✅ aplican sin error en PostgreSQL 16 — `supabase/migrations/0001`–`0013` |
+| Migraciones PostgreSQL (esquema + RLS + funciones + triggers) | ✅ aplican sin error en PostgreSQL 16 — las 13 migraciones de `supabase/migrations/` |
 | Seed (permisos, roles, catálogos, 106 unidades) | ✅ `supabase/seed.sql` + `supabase/seed/{units,engagements}.sql` |
 | Suite de autorización — **15/15 pruebas en verde** (10 casos del contrato + 5 extras) | ✅ `supabase/tests/authz_matrix_test.sql` |
 | Frontend `apps/web` (auth+MFA, shell, tableros, lista/detalle de actividad, transiciones) | ✅ `pnpm typecheck` + `vite build` OK |
@@ -30,7 +30,7 @@ Documentos de fases previas (fuente de verdad), en [`docs/`](docs/): análisis (
 apps/web/            React + TS + Vite  (frontend, → Cloudflare Pages)
 packages/shared/     tipos, enums, esquemas Zod, helpers de autorización (capa 1)
 supabase/
-  migrations/        0001–0013  (esquema + RLS + RPC)
+  migrations/        13 archivos (timestamp_nombre.sql)  (esquema + RLS + RPC)
   functions/         Edge Functions (Deno)
   seed.sql           datos maestros
   tests/             pgTAP — matriz de autorización
@@ -40,40 +40,46 @@ docs/                fases 1–4a + guías
 
 ## Requisitos
 
-- [Supabase CLI](https://supabase.com/docs/guides/cli) ≥ 1.200
-- Docker (para el stack local)
-- Node ≥ 20 + pnpm (para el frontend, cuando exista)
+- Node ≥ 20 + pnpm (frontend). Portables instalados en `%USERPROFILE%\dev-tools`.
+- [Supabase CLI](https://supabase.com/docs/guides/cli) (aplicar migraciones / desplegar).
+- Docker **solo** si se quiere el stack local completo; alternativa sin Docker: `scripts/local_pg_shim.sql` + PostgreSQL vanilla.
 
-## Puesta en marcha (local)
+## Puesta en marcha
+
+Ver [`docs/PUESTA_EN_MARCHA.md`](docs/PUESTA_EN_MARCHA.md). Resumen:
 
 ```bash
-supabase start                # levanta Postgres + Auth + Studio local
-supabase db reset             # aplica migrations 0001–0012 + seed.sql
-supabase test db              # corre supabase/tests/*.sql (pgTAP) → deben pasar los 10 casos
+pnpm install
+pnpm typecheck && pnpm --filter @rat/web build   # frontend
+# BD con Docker:
+supabase start && supabase db reset && supabase test db
+# BD sin Docker (PostgreSQL vanilla en PGHOST/PGPORT/…):
+#   psql -f scripts/local_pg_shim.sql  →  migraciones  →  seed.sql  →  pgtap.sql  →  tests/authz_matrix_test.sql
 ```
 
 Regenerar el seed de unidades tras editar el catálogo:
 
 ```bash
-python scripts/gen_units_seed.py     # seed-data/organizational_units.v0.1.json → supabase/seed/units.sql
+pnpm gen:units     # seed-data/organizational_units.v0.1.json → supabase/seed/units.sql
 ```
 
-## Orden de las migraciones
+## Migraciones (`supabase/migrations/` — `<timestamp>_<nombre>.sql`, en orden)
 
-| # | Archivo | Contenido |
+| # | Nombre | Contenido |
 |---|---|---|
-| 0001 | `foundation.sql` | extensiones, esquema `app`, enums, identidad (`profiles`), RBAC (`roles`/`permissions`/`user_roles`/`user_unit_assignments`), config institucional |
-| 0002 | `org_units.sql` | árbol de unidades + cierre transitivo + alias + **estado global de unidad** + seguimiento del proyecto |
-| 0003 | `catalogs.sql` | vocabularios controlados |
-| 0004 | `processing_activities.sql` | actividad de tratamiento + colecciones hijas + reglas de integridad |
-| 0005 | `workflow_activity.sql` | máquina de estado de la **actividad** + completitud + `app.set_activity_status()` |
-| 0006 | `audit.sql` | bitácora append-only + cadena de hash + `app.write_audit()` |
-| 0007 | `versioning.sql` | snapshots inmutables + diff + restaurar |
-| 0008 | `auth_helpers.sql` | **funciones de autorización** (`app.has_perm`, `app.is_institutional`, `app.user_unit_ids`, `app.is_jefe_of`, `app.can_see_unit`, `app.is_mfa`) |
-| 0009 | `rls_policies.sql` | **CAPA 3** — RLS deny-by-default + `FORCE` en toda tabla + anti-autoelevación |
-| 0010 | `dashboards_rpc.sql` | `app.set_unit_rat_status()`, `app.unit_dashboard()`, `app.institutional_dashboard()` (autorización explícita) |
-| 0011 | `import.sql` | staging de importación (nunca publica actividades) |
-| 0012 | `grants.sql` | normalización de privilegios (mínimo privilegio) |
+| 01 | `foundation` | extensiones, esquema `app`, enums, identidad (`profiles`), RBAC (`roles`/`permissions`/`user_roles`/`user_unit_assignments`), config institucional |
+| 02 | `org_units` | árbol de unidades + cierre transitivo + alias + **estado global de unidad** + seguimiento del proyecto |
+| 03 | `catalogs` | vocabularios controlados |
+| 04 | `processing_activities` | actividad de tratamiento + colecciones hijas + reglas de integridad |
+| 05 | `workflow_activity` | máquina de estado de la **actividad** + completitud + `app.set_activity_status()` |
+| 06 | `audit` | bitácora append-only + cadena de hash + `app.write_audit()` |
+| 07 | `versioning` | snapshots inmutables + diff + restaurar |
+| 08 | `auth_helpers` | **funciones de autorización** (`app.has_perm`, `app.is_institutional`, `app.user_unit_ids`, `app.is_jefe_of`, `app.can_see_unit`, `app.is_mfa`) |
+| 09 | `rls_policies` | **CAPA 3** — RLS deny-by-default + `FORCE` en toda tabla + anti-autoelevación |
+| 10 | `dashboards_rpc` | `app.set_unit_rat_status()`, `app.unit_dashboard()`, `app.institutional_dashboard()` (autorización explícita) |
+| 11 | `import` | staging de importación (nunca publica actividades) |
+| 12 | `grants` | normalización de privilegios (mínimo privilegio) |
+| 13 | `public_api` | wrappers en `public` para exponer las RPC vía PostgREST |
 
 ## Principio rector
 

@@ -1,6 +1,6 @@
 # Políticas RLS — referencia tabla por tabla
 
-Implementación: [`supabase/migrations/0009_rls_policies.sql`](../supabase/migrations/0009_rls_policies.sql) (+ `0010`, `0011` para las tablas creadas ahí).
+Implementación: [`supabase/migrations/20260909120109_rls_policies.sql`](../supabase/migrations/20260909120109_rls_policies.sql) (+ `…110`, `…111` para las tablas creadas ahí).
 Principio: **toda** tabla de negocio con `ENABLE ROW LEVEL SECURITY` **y** `FORCE ROW LEVEL SECURITY`. **Sin política ⇒ acceso denegado.**
 
 `service_role` (Supabase) tiene `BYPASSRLS`: lo usan solo las Edge Functions y **siempre** tras verificación explícita de autorización en el código de la función.

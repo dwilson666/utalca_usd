@@ -3,7 +3,7 @@
 --   Recrea los objetos que Supabase provee (esquema auth, roles, extensions).
 --   NUNCA ejecutar contra un proyecto Supabase real: allí ya existen.
 --   Uso:  psql -v ON_ERROR_STOP=1 -f scripts/local_pg_shim.sql
---         luego migrations 0001..0013, luego supabase/seed.sql,
+--         luego las 13 migraciones en orden, luego supabase/seed.sql,
 --         luego (opcional) pgtap.sql + supabase/tests/authz_matrix_test.sql
 -- ════════════════════════════════════════════════════════════════════════════
 
