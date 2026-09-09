@@ -1,0 +1,19 @@
+{
+  "name": "rat-institucional",
+  "private": true,
+  "description": "Plataforma institucional RAT · Universidad de Talca",
+  "packageManager": "pnpm@9.12.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "pnpm --filter @rat/web dev",
+    "build": "pnpm --filter @rat/web build",
+    "typecheck": "pnpm --filter @rat/shared --filter @rat/web typecheck",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
+    "gen:types": "supabase gen types typescript --local > packages/shared/src/database.types.ts",
+    "gen:units": "python scripts/gen_units_seed.py"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

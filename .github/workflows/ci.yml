@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # ── Base de datos: migraciones + seed + suite de autorización (pgTAP) ──────
+  database:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Regenerar seed de unidades
+        run: |
+          python scripts/gen_units_seed.py
+          git diff --exit-code supabase/seed/units.sql \
+            || (echo "::error::supabase/seed/units.sql desactualizado — corre pnpm gen:units" && exit 1)
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Levantar stack local
+        run: supabase start
+
+      - name: Aplicar migraciones + seed
+        run: supabase db reset
+
+      - name: Suite de autorización (10 casos + extras)  ── CRITERIO DE ACEPTACIÓN
+        run: supabase test db
+
+      - name: Detener stack
+        if: always()
+        run: supabase stop
+
+  # ── Frontend + paquete compartido: typecheck + build ─────────────────────
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - name: Build web
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_ANON_KEY: build-time-placeholder
+        run: pnpm --filter @rat/web build
+
+  # ── Edge Functions: type-check con Deno ─────────────────────────────────
+  functions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - run: deno check supabase/functions/**/index.ts

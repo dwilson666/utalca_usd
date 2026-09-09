@@ -1,0 +1,32 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# build
+dist/
+build/
+.output/
+.vercel/
+.wrangler/
+
+# env / secrets  — NUNCA commitear
+.env
+.env.*
+!.env.example
+supabase/.branches/
+supabase/.temp/
+**/service_role*.txt
+
+# supabase local
+.supabase/
+
+# editores / SO
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.log
+
+# python
+__pycache__/
+*.pyc

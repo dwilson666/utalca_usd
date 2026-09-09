@@ -1,0 +1,1170 @@
+<title>RAT · Universidad de Talca</title>
+<meta name="description" content="Prototipo navegable de la plataforma institucional de Registro de Actividades de Tratamiento de datos personales.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+/* ─────────────────────────────  TOKENS  ───────────────────────────── */
+:root{
+  --ground:#f4f6f8; --surface:#ffffff; --sunken:#eef1f4;
+  --ink:#141b26; --ink-muted:#5a6675; --border:#d7dde5;
+  --navy:#17324f; --navy-ink:#e9eef4;
+  --accent:#2f6f9f; --accent-weak:#e3eef5; --accent-ink:#123449; --on-accent:#ffffff;
+  --success:#2e7d5b; --success-weak:#e2efe9;
+  --warning:#b9762a; --warning-weak:#f4e9dc;
+  --critical:#b23b3b; --critical-weak:#f4e2e2;
+  --info:#4a5b8c; --info-weak:#e6e9f2;
+  --shadow:0 6px 24px -8px rgba(20,27,38,.22);
+  --r-xs:2px; --r-sm:6px; --r-lg:10px;
+  --f-display:"Spectral",Georgia,"Times New Roman",serif;
+  --f-ui:"Public Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0f141b; --surface:#161d27; --sunken:#1c2530;
+    --ink:#e6e9ee; --ink-muted:#9aa7b6; --border:#2a3542;
+    --navy:#0c1a2a; --navy-ink:#cdd9e6;
+    --accent:#4f97c9; --accent-weak:#1e3a4d; --accent-ink:#dcecf6; --on-accent:#08131b;
+    --success:#5cba8e; --success-weak:#1a2c25;
+    --warning:#d99a52; --warning-weak:#33261a;
+    --critical:#e07a7a; --critical-weak:#331e1e;
+    --info:#8ea1d4; --info-weak:#1f2637;
+    --shadow:0 6px 24px -8px rgba(0,0,0,.55);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0f141b; --surface:#161d27; --sunken:#1c2530;
+  --ink:#e6e9ee; --ink-muted:#9aa7b6; --border:#2a3542;
+  --navy:#0c1a2a; --navy-ink:#cdd9e6;
+  --accent:#4f97c9; --accent-weak:#1e3a4d; --accent-ink:#dcecf6; --on-accent:#08131b;
+  --success:#5cba8e; --success-weak:#1a2c25;
+  --warning:#d99a52; --warning-weak:#33261a;
+  --critical:#e07a7a; --critical-weak:#331e1e;
+  --info:#8ea1d4; --info-weak:#1f2637;
+  --shadow:0 6px 24px -8px rgba(0,0,0,.55);
+}
+
+/* ─────────────────────────────  BASE  ───────────────────────────── */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--f-ui); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--f-display); font-weight:600; margin:0; text-wrap:balance; line-height:1.2}
+a{color:var(--accent); text-decoration:none}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:var(--r-xs)}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+.tnum{font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-muted)}
+.eyebrow{font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-muted); font-weight:600}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+
+/* prototype strip */
+.proto{
+  position:sticky; top:0; z-index:60; display:flex; gap:8px; align-items:center; justify-content:center;
+  background:var(--warning-weak); color:var(--warning); border-bottom:1px solid var(--border);
+  font-size:12px; padding:5px 12px; font-weight:500;
+}
+.proto svg{flex:none}
+
+/* ─────────────────────────────  BUTTONS  ───────────────────────────── */
+.btn{
+  display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:var(--r-sm);
+  border:1px solid var(--border); background:var(--surface); color:var(--ink);
+  font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; transition:background .12s,border-color .12s;
+}
+.btn:hover{background:var(--sunken)}
+.btn--primary{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.btn--primary:hover{filter:brightness(1.06); background:var(--accent)}
+.btn--ghost{background:transparent; border-color:transparent}
+.btn--ghost:hover{background:var(--sunken)}
+.btn--danger{color:var(--critical); border-color:var(--border)}
+.btn--danger:hover{background:var(--critical-weak)}
+.btn--sm{padding:5px 10px; font-size:12px}
+.btn[disabled]{opacity:.5; cursor:not-allowed}
+.btn svg{width:15px; height:15px; flex:none}
+
+/* ─────────────────────────────  PILLS / CHIPS  ───────────────────────────── */
+.pill{display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:100px;
+  font-size:11px; font-weight:600; letter-spacing:.02em; border:1px solid transparent; white-space:nowrap}
+.pill::before{content:""; width:6px; height:6px; border-radius:100px; background:currentColor; flex:none}
+.pill--borrador{background:var(--info-weak); color:var(--info)}
+.pill--completado{background:var(--info-weak); color:var(--info)}
+.pill--revision{background:var(--accent-weak); color:var(--accent)}
+.pill--observado{background:var(--warning-weak); color:var(--warning)}
+.pill--corregido{background:var(--warning-weak); color:var(--warning)}
+.pill--aprobado{background:var(--success-weak); color:var(--success)}
+.pill--cerrado{background:var(--sunken); color:var(--ink-muted)}
+.pill--cerrado::before{border-radius:1px}
+.chip{display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:var(--r-xs);
+  font-size:11px; font-weight:600; background:var(--sunken); color:var(--ink-muted); border:1px solid var(--border)}
+.chip--sensible{background:var(--critical-weak); color:var(--critical); border-color:transparent}
+.chip--transf{background:var(--warning-weak); color:var(--warning); border-color:transparent}
+.chip--auto{background:var(--info-weak); color:var(--info); border-color:transparent}
+
+/* ─────────────────────────────  CARDS / TABLES  ───────────────────────────── */
+.card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm)}
+.card__h{padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px}
+.card__h h3{font-size:15px}
+.card__b{padding:16px}
+.grid{display:grid; gap:16px}
+
+table.data{width:100%; border-collapse:collapse; font-size:13px}
+.data caption{text-align:left; color:var(--ink-muted); font-size:12px; padding:0 0 8px}
+.data th{background:var(--sunken); text-align:left; font-weight:600; font-size:11px; text-transform:uppercase;
+  letter-spacing:.05em; color:var(--ink-muted); padding:8px 12px; border-bottom:1px solid var(--border); white-space:nowrap}
+.data td{padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle}
+.data tr:last-child td{border-bottom:0}
+.data tbody tr:hover{background:var(--sunken)}
+.tablewrap{overflow-x:auto; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface)}
+.tablewrap .data th:first-child,.tablewrap .data td:first-child{padding-left:16px}
+
+/* ─────────────────────────────  APP SHELL  ───────────────────────────── */
+.app{display:grid; grid-template-columns:244px 1fr; min-height:calc(100vh - 29px)}
+.app.is-auth{display:none}
+.sidebar{background:var(--navy); color:var(--navy-ink); padding:18px 12px; display:flex; flex-direction:column; gap:4px}
+.brand{display:flex; align-items:center; gap:10px; padding:6px 10px 16px; border-bottom:1px solid rgba(255,255,255,.12); margin-bottom:10px}
+.brand .mark{width:30px; height:30px; border-radius:var(--r-sm); background:var(--navy-ink); color:var(--navy);
+  display:grid; place-items:center; font-family:var(--f-display); font-weight:600; font-size:15px; flex:none}
+.brand b{font-weight:600; font-size:14px; letter-spacing:.01em; display:block}
+.brand span{font-size:11px; color:rgba(233,238,244,.65)}
+.nav-group{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:rgba(233,238,244,.5); padding:14px 10px 6px}
+.nav a{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:var(--r-sm);
+  color:rgba(233,238,244,.82); font-size:13px; font-weight:500}
+.nav a:hover{background:rgba(255,255,255,.07); color:#fff}
+.nav a.active{background:rgba(255,255,255,.13); color:#fff; font-weight:600}
+.nav a svg{width:17px; height:17px; flex:none; opacity:.85}
+
+.topbar{display:flex; align-items:center; gap:12px; padding:10px 22px; background:var(--surface); border-bottom:1px solid var(--border); position:sticky; top:29px; z-index:40}
+.topbar .sel{display:flex; align-items:center; gap:7px; padding:6px 10px; border:1px solid var(--border); border-radius:var(--r-sm); font-size:13px; font-weight:500; background:var(--ground); cursor:pointer}
+.topbar .spacer{flex:1}
+.rolebadge{font-size:11px; font-weight:600; padding:4px 9px; border-radius:100px; background:var(--accent-weak); color:var(--accent)}
+.iconbtn{width:32px; height:32px; display:grid; place-items:center; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--ground); cursor:pointer; color:var(--ink-muted)}
+.iconbtn:hover{background:var(--sunken); color:var(--ink)}
+.iconbtn svg{width:16px; height:16px}
+.avatar{width:32px; height:32px; border-radius:100px; background:var(--navy); color:var(--navy-ink); display:grid; place-items:center; font-size:12px; font-weight:700}
+
+.main{padding:22px 26px 60px; max-width:1240px}
+.pagehead{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap}
+.pagehead h1{font-size:24px; margin-bottom:3px}
+.pagehead .sub{color:var(--ink-muted); font-size:13px}
+.pagehead .acts{display:flex; gap:8px; flex-wrap:wrap}
+.screen{display:none}
+.screen.active{display:block}
+
+/* ─────────────────────────────  KPI TILES  ───────────────────────────── */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:18px}
+.kpi{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); padding:14px 15px}
+.kpi .n{font-family:var(--f-display); font-size:30px; font-weight:600; line-height:1; letter-spacing:-.01em}
+.kpi .l{font-size:11.5px; color:var(--ink-muted); margin-top:6px; text-transform:uppercase; letter-spacing:.05em; font-weight:600}
+.kpi.hl .n{color:var(--accent)}
+
+/* progress bars */
+.bar{height:8px; border-radius:100px; background:var(--sunken); overflow:hidden}
+.bar > i{display:block; height:100%; border-radius:100px; background:var(--accent)}
+.bar.lo > i{background:var(--warning)} .bar.ok > i{background:var(--success)}
+.stacked{display:flex; height:14px; border-radius:var(--r-xs); overflow:hidden; border:1px solid var(--border)}
+.stacked > i{display:block}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink-muted); margin-top:10px}
+.legend b{display:inline-flex; align-items:center; gap:6px; font-weight:500}
+.legend b::before{content:""; width:9px; height:9px; border-radius:2px; background:currentColor}
+
+.unit-row{display:grid; grid-template-columns:1.4fr 88px 1fr 52px; gap:14px; align-items:center; padding:11px 0; border-bottom:1px solid var(--border); font-size:13px}
+.unit-row:last-child{border-bottom:0}
+.unit-row .nm{font-weight:600}
+.unit-row .mut{font-size:11.5px; color:var(--ink-muted)}
+
+.attn{display:flex; gap:11px; padding:11px 0; border-bottom:1px solid var(--border); font-size:13px; align-items:flex-start}
+.attn:last-child{border-bottom:0}
+.attn .dot{width:8px; height:8px; border-radius:100px; margin-top:5px; flex:none}
+.dot--warn{background:var(--warning)} .dot--crit{background:var(--critical)} .dot--info{background:var(--accent)}
+
+/* ─────────────────────────────  AUTH SCREENS  ───────────────────────────── */
+.auth{min-height:calc(100vh - 29px); place-items:center; padding:40px 20px;
+  background:linear-gradient(180deg,var(--ground),var(--sunken))}
+.auth.active{display:grid}
+.authcard{width:100%; max-width:400px; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:30px 28px; box-shadow:var(--shadow)}
+.authcard .brand{border:0; padding:0 0 18px; margin:0}
+.authcard h2{font-size:19px; margin-bottom:4px}
+.authcard p.lede{color:var(--ink-muted); font-size:13px; margin:0 0 20px}
+.field{margin-bottom:14px}
+.field label{display:block; font-size:12px; font-weight:600; margin-bottom:5px}
+.field .hint{font-size:11.5px; color:var(--ink-muted); font-weight:400}
+.field input{width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--ground); color:var(--ink); font-family:inherit; font-size:14px}
+.field input:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent)}
+.field.err input{border-color:var(--critical)}
+.field .errmsg{color:var(--critical); font-size:12px; margin-top:5px; display:flex; gap:5px; align-items:center}
+.otp{display:flex; gap:8px; justify-content:space-between}
+.otp input{width:100%; text-align:center; font-family:var(--f-mono); font-size:20px; padding:10px 0}
+.authfoot{margin-top:16px; font-size:12px; color:var(--ink-muted); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px}
+.qrbox{display:flex; gap:16px; align-items:center; background:var(--sunken); border:1px solid var(--border); border-radius:var(--r-sm); padding:14px; margin-bottom:16px}
+.qr{width:96px; height:96px; flex:none; background:#fff; border-radius:var(--r-xs); padding:6px}
+.reccodes{font-family:var(--f-mono); font-size:12px; background:var(--sunken); border:1px dashed var(--border); border-radius:var(--r-sm); padding:12px; columns:2; margin:12px 0}
+
+/* ─────────────────────────────  WIZARD  ───────────────────────────── */
+.wizard{display:grid; grid-template-columns:220px 1fr; gap:26px; align-items:start}
+.steps{display:flex; flex-direction:column; gap:2px; position:sticky; top:90px}
+.steps button{display:flex; gap:10px; align-items:center; text-align:left; width:100%; padding:8px 10px; border:0; background:transparent; border-radius:var(--r-sm); cursor:pointer; color:var(--ink-muted); font-size:12.5px; font-weight:500}
+.steps button:hover{background:var(--sunken)}
+.steps button.active{background:var(--accent-weak); color:var(--accent); font-weight:700}
+.steps .idx{width:22px; height:22px; border-radius:100px; border:1px solid var(--border); display:grid; place-items:center; font-size:11px; font-weight:700; flex:none; background:var(--surface)}
+.steps button.active .idx{border-color:var(--accent); background:var(--accent); color:#fff}
+.steps button.done .idx{border-color:var(--success); color:var(--success)}
+.step-panel{display:none} .step-panel.active{display:block}
+.formgrid{display:grid; gap:16px; max-width:640px}
+.formrow label{display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; margin-bottom:5px}
+.req{color:var(--critical); font-weight:700}
+.help{width:15px; height:15px; border-radius:100px; border:1px solid var(--border); font-size:10px; color:var(--ink-muted); display:inline-grid; place-items:center; cursor:help; font-weight:700}
+.formrow .ex{font-size:11.5px; color:var(--ink-muted); margin-top:4px; font-style:italic}
+.formrow input,.formrow textarea,.formrow select{width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--ground); color:var(--ink); font-family:inherit; font-size:13.5px}
+.formrow textarea{min-height:74px; resize:vertical}
+.checks{display:flex; flex-wrap:wrap; gap:8px}
+.checkpill{display:inline-flex; align-items:center; gap:7px; padding:6px 11px; border:1px solid var(--border); border-radius:100px; font-size:12.5px; cursor:pointer; background:var(--ground)}
+.checkpill.on{background:var(--accent-weak); border-color:var(--accent); color:var(--accent); font-weight:600}
+.checkpill.on.sens{background:var(--critical-weak); border-color:var(--critical); color:var(--critical)}
+.completion{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); padding:14px; position:sticky; top:90px}
+.completion .pct{font-family:var(--f-display); font-size:26px; font-weight:600}
+.cklist{list-style:none; margin:12px 0 0; padding:0; font-size:12.5px; display:flex; flex-direction:column; gap:6px}
+.cklist li{display:flex; gap:7px; align-items:center; color:var(--ink-muted)}
+.cklist li.ok{color:var(--ink)}
+.cklist svg{width:14px; height:14px; flex:none}
+
+.callout{display:flex; gap:10px; padding:12px 14px; border-radius:var(--r-sm); font-size:13px; border:1px solid var(--border); background:var(--sunken)}
+.callout--warn{background:var(--warning-weak); border-color:transparent; color:var(--warning)}
+.callout--info{background:var(--accent-weak); border-color:transparent; color:var(--accent-ink)}
+.callout svg{width:16px; height:16px; flex:none; margin-top:1px}
+
+/* review summary */
+.reviewgrid{display:grid; grid-template-columns:1fr 1fr; gap:2px 22px; max-width:680px; font-size:13px}
+.reviewgrid dt{color:var(--ink-muted); font-size:11px; text-transform:uppercase; letter-spacing:.05em; font-weight:600; padding-top:12px}
+.reviewgrid dd{margin:0 0 8px; padding-bottom:8px; border-bottom:1px solid var(--border)}
+
+/* detail */
+.detail{display:grid; grid-template-columns:1fr 260px; gap:24px; align-items:start}
+.tabs{display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:18px}
+.tabs button{border:0; background:transparent; padding:9px 13px; font-size:13px; font-weight:600; color:var(--ink-muted); cursor:pointer; border-bottom:2px solid transparent}
+.tabs button.active{color:var(--ink); border-bottom-color:var(--accent)}
+.section{border:1px solid var(--border); border-radius:var(--r-sm); margin-bottom:10px; background:var(--surface)}
+.section > summary{padding:12px 14px; font-weight:600; font-size:13.5px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center}
+.section > summary::-webkit-details-marker{display:none}
+.section[open] > summary{border-bottom:1px solid var(--border)}
+.section .sbody{padding:14px; font-size:13px; display:grid; gap:10px}
+.kv{display:grid; grid-template-columns:150px 1fr; gap:12px}
+.kv dt{color:var(--ink-muted); font-size:12px}
+.side-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); padding:14px; margin-bottom:12px; font-size:12.5px}
+.side-card h4{font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-muted); margin-bottom:10px}
+.side-card .kv{grid-template-columns:1fr; gap:2px; margin-bottom:9px}
+.side-card .kv dt{font-size:11px}
+.side-card .kv dd{margin:0; font-weight:500}
+
+/* timeline / audit */
+.tl{list-style:none; margin:0; padding:0}
+.tl li{display:grid; grid-template-columns:118px 1fr; gap:14px; padding:11px 0; border-bottom:1px solid var(--border); font-size:12.5px}
+.tl li:last-child{border-bottom:0}
+.tl .tl-when{color:var(--ink-muted); font-family:var(--f-mono); font-size:11.5px}
+.tl .tl-what b{font-weight:600}
+.diff{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.diff .col h4{font-size:12px; color:var(--ink-muted); margin-bottom:8px; display:flex; gap:8px; align-items:center}
+.diffrow{padding:8px 10px; border-radius:var(--r-xs); font-size:12.5px; margin-bottom:5px; border:1px solid var(--border)}
+.diffrow.add{background:var(--success-weak); border-color:transparent}
+.diffrow.del{background:var(--critical-weak); border-color:transparent}
+.diffrow.same{color:var(--ink-muted)}
+
+/* obs panel */
+.obs{border:1px solid var(--border); border-radius:var(--r-sm); padding:12px 14px; margin-bottom:10px; font-size:13px; background:var(--surface)}
+.obs .obs-h{display:flex; justify-content:space-between; gap:10px; margin-bottom:6px; align-items:center}
+.obs .fieldref{font-family:var(--f-mono); font-size:11.5px; background:var(--sunken); padding:2px 6px; border-radius:var(--r-xs)}
+
+/* import steps */
+.impsteps{display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap}
+.impsteps .s{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-muted); padding:6px 10px; border:1px solid var(--border); border-radius:100px}
+.impsteps .s.on{background:var(--accent-weak); border-color:var(--accent); color:var(--accent); font-weight:600}
+.impsteps .s.ok{color:var(--success); border-color:var(--success)}
+.preview-nums{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; margin:14px 0}
+.pv{border:1px solid var(--border); border-radius:var(--r-sm); padding:12px; text-align:center}
+.pv .n{font-family:var(--f-display); font-size:22px; font-weight:600}
+.pv.warn .n{color:var(--warning)} .pv.err .n{color:var(--critical)} .pv.ok .n{color:var(--success)}
+
+/* tree */
+.tree{font-size:13px}
+.tree details{margin-left:0}
+.tree summary{padding:6px 8px; cursor:pointer; border-radius:var(--r-sm); display:flex; align-items:center; gap:8px; list-style:none}
+.tree summary::-webkit-details-marker{display:none}
+.tree summary:hover{background:var(--sunken)}
+.tree .caret{transition:transform .12s; color:var(--ink-muted)}
+.tree details[open] > summary .caret{transform:rotate(90deg)}
+.tree .kids{margin-left:18px; border-left:1px solid var(--border); padding-left:8px}
+.tree .leaf{padding:6px 8px; display:flex; align-items:center; gap:8px; border-radius:var(--r-sm)}
+.tree .leaf:hover{background:var(--sunken)}
+.tree .utype{font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-muted); font-weight:600}
+.badge-review{font-size:10px; font-weight:700; color:var(--warning); background:var(--warning-weak); padding:1px 7px; border-radius:100px}
+
+.filters{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; align-items:center}
+.filters .search{flex:1; min-width:180px; display:flex; align-items:center; gap:8px; padding:7px 11px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface)}
+.filters .search input{border:0; background:transparent; outline:0; width:100%; font-family:inherit; font-size:13px; color:var(--ink)}
+.selctl{padding:7px 10px; border:1px solid var(--border); border-radius:var(--r-sm); background:var(--surface); font-size:12.5px; font-weight:500; color:var(--ink)}
+
+.kanban{display:grid; grid-template-columns:repeat(4,1fr); gap:12px}
+.kcol{background:var(--sunken); border:1px solid var(--border); border-radius:var(--r-sm); padding:10px}
+.kcol h4{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-muted); margin-bottom:9px; display:flex; justify-content:space-between}
+.kcard{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-sm); padding:9px 11px; margin-bottom:8px; font-size:12.5px}
+.kcard b{display:block; font-weight:600; margin-bottom:3px}
+.kcard .m{color:var(--ink-muted); font-size:11px}
+
+@media (max-width:1000px){
+  .app{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .wizard,.detail{grid-template-columns:1fr}
+  .diff,.reviewgrid,.kanban{grid-template-columns:1fr}
+  .steps,.completion{position:static}
+}
+</style>
+
+<div class="proto">
+  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  Prototipo · datos de ejemplo — no es información real de la Universidad de Talca
+</div>
+
+<div class="app" id="app">
+  <!-- ─────────────  SIDEBAR  ───────────── -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">R</div>
+      <div><b>RAT</b><span>Universidad de Talca</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="#tablero" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>Tablero</a>
+      <a href="#actividades" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>Actividades de tratamiento</a>
+      <a href="#revision" data-nav data-perm="dpd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Revisión</a>
+      <a href="#seguimiento" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M3 12h18M3 18h12"/></svg>Seguimiento del levantamiento</a>
+      <a href="#importacion" data-nav data-perm="dpd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Importación</a>
+      <a href="#auditoria" data-nav><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Auditoría</a>
+      <div class="nav-group" data-perm="admin">Administración</div>
+      <a href="#usuarios" data-nav data-perm="admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M16 11a3 3 0 0 0 0-6"/><path d="M21 20c0-2.5-2-4-4-4.5"/></svg>Usuarios y roles</a>
+      <a href="#unidades" data-nav data-perm="admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="3" width="6" height="5"/><path d="M12 8v5m0 0H6v3m6-3h6v3"/><rect x="3" y="16" width="6" height="5"/><rect x="15" y="16" width="6" height="5"/></svg>Unidades</a>
+      <a href="#catalogos" data-nav data-perm="admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Catálogos</a>
+      <a href="#config" data-nav data-perm="admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.3 1a7 7 0 0 0-1.7-1l-.3-2.5H8.7L8.4 4a7 7 0 0 0-1.7 1l-2.3-1-2 3.4L4.4 11a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 1.7 1l.3 2.5h4.6l.3-2.5a7 7 0 0 0 1.7-1l2.3 1 2-3.4-2-1.5a7 7 0 0 0 .1-1Z"/></svg>Configuración institucional</a>
+    </nav>
+    <div class="spacer" style="flex:1"></div>
+    <button class="btn btn--ghost btn--sm" id="gotologin" style="color:rgba(233,238,244,.7); justify-content:flex-start">Ver pantallas de acceso →</button>
+  </aside>
+
+  <div>
+    <!-- ─────────────  TOPBAR  ───────────── -->
+    <div class="topbar">
+      <button class="sel" id="unitsel">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M6 21V7l6-4 6 4v14M10 21v-5h4v5"/></svg>
+        <span id="unitsel-label">Todas las unidades</span>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="spacer"></div>
+      <label class="selctl" style="display:flex;align-items:center;gap:7px">
+        Rol
+        <select id="rolesel" style="border:0;background:transparent;font-weight:600;color:inherit;font-family:inherit">
+          <option value="dpd">DPD / Admin RAT</option>
+          <option value="admin">Superadministrador</option>
+          <option value="unit">Responsable de Unidad</option>
+          <option value="auditor">Auditor / Consulta</option>
+        </select>
+      </label>
+      <button class="iconbtn" id="themebtn" aria-label="Cambiar tema">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      </button>
+      <button class="iconbtn" aria-label="Notificaciones (3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 21h4"/></svg></button>
+      <div class="avatar" title="María Elisa Quinteros">MQ</div>
+    </div>
+
+    <main class="main">
+
+      <!-- ═════════════  TABLERO INSTITUCIONAL  ═════════════ -->
+      <section class="screen" data-screen="tablero">
+        <div class="pagehead">
+          <div>
+            <div class="eyebrow">Responsabilidad proactiva · Ley 21.719</div>
+            <h1>Tablero institucional</h1>
+            <div class="sub">Avance del Registro de Actividades de Tratamiento — actualizado hace 8 minutos</div>
+          </div>
+          <div class="acts">
+            <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Exportar RAT</button>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="n tnum">21</div><div class="l">Unidades / direcciones</div></div>
+          <div class="kpi"><div class="n tnum">4</div><div class="l">Con actividades RAT</div></div>
+          <div class="kpi"><div class="n tnum">43</div><div class="l">Actividades registradas</div></div>
+          <div class="kpi"><div class="n tnum">6</div><div class="l">En revisión</div></div>
+          <div class="kpi"><div class="n tnum">11</div><div class="l">Aprobadas</div></div>
+          <div class="kpi hl"><div class="n tnum">19%</div><div class="l">Avance institucional</div></div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1.6fr 1fr">
+          <div class="card">
+            <div class="card__h"><h3>Avance por unidad</h3><button class="selctl">Ordenar: % avance ▾</button></div>
+            <div class="card__b">
+              <div class="unit-row" style="font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-muted);font-weight:600;padding-bottom:6px">
+                <span>Unidad · Responsable</span><span>Actividades</span><span>Avance</span><span></span>
+              </div>
+              <div class="unit-row">
+                <div><div class="nm">Vicerrectoría Académica</div><div class="mut">R. Palomo · act. 06-09</div></div>
+                <div class="tnum">15 <span class="mut">/ 3 pend.</span></div>
+                <div class="bar ok"><i style="width:62%"></i></div><div class="tnum" style="text-align:right;font-weight:600">62%</div>
+              </div>
+              <div class="unit-row">
+                <div><div class="nm">V. Desarrollo Estudiantil</div><div class="mut">P. Jorquera · act. 05-09</div></div>
+                <div class="tnum">11 <span class="mut">/ 5 pend.</span></div>
+                <div class="bar"><i style="width:55%"></i></div><div class="tnum" style="text-align:right;font-weight:600">55%</div>
+              </div>
+              <div class="unit-row">
+                <div><div class="nm">Facultad de Medicina</div><div class="mut">N. Brown · act. 02-09</div></div>
+                <div class="tnum">11 <span class="mut">/ 7 pend.</span></div>
+                <div class="bar lo"><i style="width:38%"></i></div><div class="tnum" style="text-align:right;font-weight:600">38%</div>
+              </div>
+              <div class="unit-row">
+                <div><div class="nm">Fac. Cs. de la Salud</div><div class="mut">L. Guzmán · act. 29-08</div></div>
+                <div class="tnum">6 <span class="mut">/ 4 pend.</span></div>
+                <div class="bar lo"><i style="width:32%"></i></div><div class="tnum" style="text-align:right;font-weight:600">32%</div>
+              </div>
+              <div class="unit-row">
+                <div><div class="nm">VGEA</div><div class="mut">L. Urra · sin actividades</div></div>
+                <div class="tnum">0 <span class="mut">/ 194 resp.</span></div>
+                <div class="bar lo"><i style="width:5%"></i></div><div class="tnum" style="text-align:right;font-weight:600">5%</div>
+              </div>
+              <div class="unit-row">
+                <div><div class="nm">V. de Formación</div><div class="mut">P. Jorquera · sin actividades</div></div>
+                <div class="tnum">0 <span class="mut">/ 143 resp.</span></div>
+                <div class="bar lo"><i style="width:8%"></i></div><div class="tnum" style="text-align:right;font-weight:600">8%</div>
+              </div>
+              <p class="muted" style="font-size:12px;margin:12px 0 0">15 unidades más en «solo levantamiento preliminar» →</p>
+            </div>
+          </div>
+
+          <div style="display:grid;gap:16px;align-content:start">
+            <div class="card">
+              <div class="card__h"><h3>Estado de las actividades</h3></div>
+              <div class="card__b">
+                <div class="stacked">
+                  <i style="width:37%;background:var(--info)" title="Borrador 16"></i>
+                  <i style="width:14%;background:var(--accent)" title="En revisión 6"></i>
+                  <i style="width:12%;background:var(--warning)" title="Observado 5"></i>
+                  <i style="width:26%;background:var(--success)" title="Aprobado 11"></i>
+                  <i style="width:11%;background:var(--ink-muted)" title="Cerrado 5"></i>
+                </div>
+                <div class="legend">
+                  <b style="color:var(--info)">Borrador 16</b>
+                  <b style="color:var(--accent)">Revisión 6</b>
+                  <b style="color:var(--warning)">Observado 5</b>
+                  <b style="color:var(--success)">Aprobado 11</b>
+                  <b style="color:var(--ink-muted)">Cerrado 5</b>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card__h"><h3>Requiere tu atención</h3></div>
+              <div class="card__b">
+                <div class="attn"><span class="dot dot--crit"></span><div><b>RAT-000024</b> — dato sensible (situación socioeconómica) sin base de licitud reforzada. <span class="muted">V. Desarrollo Estudiantil</span></div></div>
+                <div class="attn"><span class="dot dot--warn"></span><div>2 actividades en revisión hace más de 10 días.</div></div>
+                <div class="attn"><span class="dot dot--info"></span><div>13 unidades sin ninguna actividad registrada.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════  TABLERO DE UNIDAD  ═════════════ -->
+      <section class="screen" data-screen="tablero-unidad">
+        <div class="pagehead">
+          <div>
+            <div class="eyebrow">Vicerrectoría Académica</div>
+            <h1>Tablero de la unidad</h1>
+            <div class="sub">Su unidad · 15 actividades · 3 con campos pendientes</div>
+          </div>
+          <div class="acts">
+            <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nueva actividad de tratamiento</button>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card__b" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+            <div><div class="eyebrow">Avance de la unidad</div><div style="font-family:var(--f-display);font-size:28px;font-weight:600">62%</div></div>
+            <div class="bar ok" style="flex:1;min-width:200px;height:12px"><i style="width:62%"></i></div>
+            <div class="muted" style="font-size:12px">Última actualización: 06-09-2026</div>
+          </div>
+        </div>
+        <div class="grid" style="grid-template-columns:1.5fr 1fr">
+          <div class="tablewrap">
+            <table class="data">
+              <caption>Actividades de Vicerrectoría Académica</caption>
+              <thead><tr><th>Código</th><th>Actividad</th><th>Estado</th><th>Completitud</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">RAT-000012</td><td>Recepción de RU para pago de incentivos por publicación</td><td><span class="pill pill--aprobado">Aprobado</span></td><td><div class="bar ok" style="width:80px"><i style="width:100%"></i></div></td></tr>
+                <tr><td class="mono">RAT-000018</td><td>Gestión de pago de incentivos de investigación</td><td><span class="pill pill--revision">En revisión</span></td><td><div class="bar" style="width:80px"><i style="width:85%"></i></div></td></tr>
+                <tr><td class="mono">RAT-000007</td><td>Movilidad e intercambio internacional de estudiantes</td><td><span class="pill pill--revision">En revisión</span></td><td><div class="bar" style="width:80px"><i style="width:78%"></i></div></td></tr>
+                <tr><td class="mono">RAT-000033</td><td>Gestión de préstamos y usuarios de Bibliotecas</td><td><span class="pill pill--borrador">Borrador</span></td><td><div class="bar lo" style="width:80px"><i style="width:45%"></i></div></td></tr>
+                <tr><td class="mono">RAT-000041</td><td>Autorizaciones y visto bueno del VAC</td><td><span class="pill pill--borrador">Borrador</span></td><td><div class="bar lo" style="width:80px"><i style="width:30%"></i></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card__h"><h3>Pendientes de esta unidad</h3></div>
+            <div class="card__b" style="font-size:13px;display:grid;gap:9px">
+              <div class="attn" style="border:0;padding:4px 0"><span class="dot dot--warn"></span><div><b>RAT-000033</b> — falta: origen de los datos, base de licitud, plazo de conservación.</div></div>
+              <div class="attn" style="border:0;padding:4px 0"><span class="dot dot--warn"></span><div><b>RAT-000041</b> — falta: finalidad, categorías de datos, destinatarios.</div></div>
+              <div class="attn" style="border:0;padding:4px 0"><span class="dot dot--info"></span><div><b>RAT-000018</b> — 1 observación del DPD pendiente de responder.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════  ACTIVIDADES (LISTA)  ═════════════ -->
+      <section class="screen" data-screen="actividades">
+        <div class="pagehead">
+          <div><h1>Actividades de tratamiento</h1><div class="sub">43 registros · alcance: todas las unidades</div></div>
+          <div class="acts">
+            <button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Exportar (XLSX / CSV)</button>
+            <button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nueva actividad</button>
+          </div>
+        </div>
+        <div class="filters">
+          <div class="search">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input placeholder="Buscar por nombre, código o finalidad…" aria-label="Buscar actividades">
+          </div>
+          <select class="selctl"><option>Unidad: todas</option></select>
+          <select class="selctl"><option>Estado: todos</option></select>
+          <select class="selctl"><option>Completitud: cualquiera</option></select>
+          <button class="chip chip--sensible">Dato sensible ✕</button>
+        </div>
+        <div class="tablewrap">
+          <table class="data">
+            <thead><tr><th>Código</th><th>Actividad</th><th>Unidad</th><th>Estado</th><th>Compl.</th><th>Atributos</th><th>Modificado</th></tr></thead>
+            <tbody>
+              <tr style="cursor:pointer" data-goto="actividad">
+                <td class="mono">RAT-000024</td><td>Acreditación socioeconómica estudiantil (FAES)</td><td>V. Desarrollo Estudiantil</td>
+                <td><span class="pill pill--observado">Observado</span></td><td class="tnum">73%</td>
+                <td><span class="chip chip--sensible">sensible</span></td><td class="mono">08-09 15:32</td>
+              </tr>
+              <tr><td class="mono">RAT-000031</td><td>Registro de atención de salud estudiantil</td><td>V. Desarrollo Estudiantil</td>
+                <td><span class="pill pill--borrador">Borrador</span></td><td class="tnum">41%</td>
+                <td><span class="chip chip--sensible">sensible · salud</span></td><td class="mono">05-09 11:07</td></tr>
+              <tr><td class="mono">RAT-000018</td><td>Gestión de pago de incentivos de investigación</td><td>Vicerrectoría Académica</td>
+                <td><span class="pill pill--revision">En revisión</span></td><td class="tnum">85%</td>
+                <td><span class="chip">datos bancarios</span></td><td class="mono">05-09 09:20</td></tr>
+              <tr><td class="mono">RAT-000007</td><td>Movilidad e intercambio internacional de estudiantes</td><td>Vicerrectoría Académica</td>
+                <td><span class="pill pill--revision">En revisión</span></td><td class="tnum">78%</td>
+                <td><span class="chip chip--transf">transf. internacional</span></td><td class="mono">04-09 16:44</td></tr>
+              <tr><td class="mono">RAT-000012</td><td>Recepción de RU para pago de incentivos por publicación</td><td>Vicerrectoría Académica</td>
+                <td><span class="pill pill--aprobado">Aprobado</span></td><td class="tnum">100%</td>
+                <td><span class="chip">MFA</span></td><td class="mono">01-09 10:12</td></tr>
+              <tr><td class="mono">RAT-000009</td><td>Contratos de honorarios académicos</td><td>Facultad de Medicina</td>
+                <td><span class="pill pill--cerrado">Cerrado</span></td><td class="tnum">100%</td>
+                <td><span class="chip chip--auto">decisión automatizada</span></td><td class="mono">28-08 14:03</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="font-size:12px;margin-top:12px">Mostrando 6 de 43 · <a href="#">página siguiente →</a></p>
+      </section>
+
+      <!-- ═════════════  DETALLE DE ACTIVIDAD  ═════════════ -->
+      <section class="screen" data-screen="actividad">
+        <div class="pagehead">
+          <div>
+            <div class="eyebrow mono">RAT-000024 · V. Desarrollo Estudiantil</div>
+            <h1>Acreditación socioeconómica estudiantil (FAES)</h1>
+            <div class="sub" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px">
+              <span class="pill pill--observado">Observado</span>
+              <span class="chip chip--sensible">dato sensible</span>
+              <span class="muted">· 1 observación obligatoria abierta</span>
+            </div>
+          </div>
+          <div class="acts">
+            <button class="btn" data-goto="historial"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/></svg>Historial</button>
+            <button class="btn btn--primary" data-goto="wizard">Corregir</button>
+          </div>
+        </div>
+        <div class="detail">
+          <div>
+            <div class="tabs"><button class="active">Resumen</button><button data-goto="historial">Historial</button><button data-goto="revision">Observaciones</button><button data-goto="auditoria">Auditoría</button></div>
+            <div class="callout callout--warn" style="margin-bottom:14px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+              <div>Trata <b>situación socioeconómica</b> (dato sensible en la Ley 21.719) y aún no declara una base de licitud reforzada. El paso 4 del formulario lo exige.</div>
+            </div>
+            <details class="section" open><summary>Identificación <span class="muted">Pasos 1</span></summary>
+              <div class="sbody">
+                <div class="kv"><dt>Unidad responsable</dt><dd>Dirección de Bienestar Estudiantil — V. Desarrollo Estudiantil</dd></div>
+                <div class="kv"><dt>Responsable operativo</dt><dd>Jorge Gajardo (administrador plataforma FAES)</dd></div>
+                <div class="kv"><dt>Responsable del tratamiento</dt><dd>Universidad de Talca · RUT 70.885.500-6 (config. institucional)</dd></div>
+                <div class="kv"><dt>Delegado (DPD)</dt><dd>Oficina de Seguridad Digital · dpd@utalca.cl</dd></div>
+              </div>
+            </details>
+            <details class="section" open><summary>Finalidad y tratamiento <span class="muted">Paso 2</span></summary>
+              <div class="sbody">
+                <div class="kv"><dt>Finalidad</dt><dd>Asignar beneficios estudiantiles según evaluación socioeconómica de estudiantes de pregrado.</dd></div>
+                <div class="kv"><dt>Descripción</dt><dd>El estudiante carga antecedentes en la plataforma FAES UTALCA; asistentes sociales evalúan; la dirección aprueba la asignación. Asistentes administrativos solo tienen vista.</dd></div>
+                <div class="kv"><dt>Origen de los datos</dt><dd>Del propio titular (formulario) y del Ministerio de Educación.</dd></div>
+              </div>
+            </details>
+            <details class="section"><summary>Titulares y datos <span class="muted">Paso 3</span></summary>
+              <div class="sbody">
+                <div class="kv"><dt>Categorías de titulares</dt><dd>Estudiantes de pregrado · apoderados</dd></div>
+                <div class="kv"><dt>Categorías de datos</dt><dd>Identificativos · contacto · académicos · <b style="color:var(--critical)">situación socioeconómica (sensible)</b></dd></div>
+              </div>
+            </details>
+            <details class="section"><summary>Base jurídica <span class="muted">Paso 4</span> <span class="badge-review">incompleto</span></summary>
+              <div class="sbody"><div class="muted">Sin base de licitud declarada.</div></div>
+            </details>
+            <details class="section"><summary>Destinatarios y transferencias · Conservación · Automatización · Seguridad <span class="muted">Pasos 5–8</span></summary>
+              <div class="sbody">
+                <div class="kv"><dt>Destinatarios</dt><dd>Ministerio de Educación · proceso de admisión (DAFE) — internos</dd></div>
+                <div class="kv"><dt>Transferencia internacional</dt><dd>No</dd></div>
+                <div class="kv"><dt>Conservación</dt><dd>Mientras dure el vínculo del estudiante + política institucional <span class="muted">(criterio por precisar)</span></dd></div>
+                <div class="kv"><dt>Decisiones automatizadas</dt><dd>No — la asignación la aprueba la dirección.</dd></div>
+                <div class="kv"><dt>Medidas de seguridad</dt><dd>Acceso restringido por credenciales UTALCA net · perfiles con solo lectura para administrativos</dd></div>
+              </div>
+            </details>
+          </div>
+          <div>
+            <div class="side-card">
+              <h4>Completitud</h4>
+              <div style="display:flex;align-items:baseline;gap:8px"><span style="font-family:var(--f-display);font-size:24px;font-weight:600">73%</span><span class="muted" style="font-size:12px">11 de 15 campos</span></div>
+              <div class="bar" style="margin-top:8px"><i style="width:73%"></i></div>
+              <ul class="cklist">
+                <li class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>Finalidad</li>
+                <li class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>Categorías de titulares</li>
+                <li class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg>Categorías de datos</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="var(--critical)" stroke-width="3"><path d="M6 6l12 12M18 6 6 18"/></svg>Base de licitud</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="var(--critical)" stroke-width="3"><path d="M6 6l12 12M18 6 6 18"/></svg>Criterio de conservación</li>
+                <li><svg viewBox="0 0 24 24" fill="none" stroke="var(--critical)" stroke-width="3"><path d="M6 6l12 12M18 6 6 18"/></svg>Origen (detalle Mineduc)</li>
+              </ul>
+            </div>
+            <div class="side-card">
+              <h4>Ciclo de vida</h4>
+              <div class="kv"><dt>Creada</dt><dd>21-08-2026 · J. Gajardo</dd></div>
+              <div class="kv"><dt>Enviada a revisión</dt><dd>02-09-2026</dd></div>
+              <div class="kv"><dt>Observada</dt><dd>08-09-2026 · DPD</dd></div>
+              <div class="kv"><dt>Versión actual</dt><dd class="mono">v4</dd></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════  WIZARD  ═════════════ -->
+      <section class="screen" data-screen="wizard">
+        <div class="pagehead">
+          <div>
+            <div class="eyebrow mono">RAT-000024 · edición</div>
+            <h1>Acreditación socioeconómica estudiantil (FAES)</h1>
+            <div class="sub">Complete los campos pendientes y vuelva a enviar a revisión</div>
+          </div>
+          <div class="acts">
+            <button class="btn btn--ghost">Guardar y salir</button>
+            <span class="muted" style="font-size:12px;align-self:center">Guardado hace un momento</span>
+          </div>
+        </div>
+        <div class="wizard">
+          <nav class="steps" id="steps" aria-label="Pasos del formulario">
+            <button class="done" data-step="1"><span class="idx">1</span>Identificación</button>
+            <button class="done" data-step="2"><span class="idx">2</span>Finalidad y tratamiento</button>
+            <button class="active" data-step="3"><span class="idx">3</span>Titulares y datos</button>
+            <button data-step="4"><span class="idx">4</span>Base jurídica</button>
+            <button data-step="5"><span class="idx">5</span>Destinatarios y transferencias</button>
+            <button data-step="6"><span class="idx">6</span>Conservación</button>
+            <button data-step="7"><span class="idx">7</span>Automatización</button>
+            <button data-step="8"><span class="idx">8</span>Seguridad</button>
+            <button data-step="9"><span class="idx">9</span>Revisión</button>
+          </nav>
+
+          <div>
+            <!-- Step 3 -->
+            <div class="step-panel active" data-panel="3">
+              <h3 style="font-size:17px;margin-bottom:4px">Paso 3 · Titulares y datos</h3>
+              <p class="muted" style="font-size:13px;margin:0 0 18px">¿De quién son los datos y qué datos se tratan? Marque «dato sensible» cuando corresponda: cambia los requisitos de la base jurídica.</p>
+              <div class="formgrid">
+                <div class="formrow">
+                  <label>Categorías de titulares <span class="req">*</span> <span class="help" title="Grupos de personas cuyos datos se tratan. Atención especial con NNA.">?</span></label>
+                  <div class="checks">
+                    <span class="checkpill on">Estudiantes</span><span class="checkpill on">Apoderados</span>
+                    <span class="checkpill">Postulantes</span><span class="checkpill">Funcionarios/as</span>
+                    <span class="checkpill">Académicos/as</span><span class="checkpill">Egresados / alumni</span>
+                  </div>
+                  <div class="ex">Ej.: estudiantes de pregrado, apoderados que respaldan la acreditación.</div>
+                </div>
+                <div class="formrow">
+                  <label>Categorías de datos personales <span class="req">*</span> <span class="help" title="Agrupe con sentido común: identificativos, contacto, académicos, económicos. Señale siempre los sensibles.">?</span></label>
+                  <div class="checks">
+                    <span class="checkpill on">Identificativos</span><span class="checkpill on">Contacto</span>
+                    <span class="checkpill on">Académicos</span><span class="checkpill on sens">Situación socioeconómica</span>
+                    <span class="checkpill">Salud</span><span class="checkpill">Datos bancarios</span>
+                  </div>
+                </div>
+                <div class="callout callout--warn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+                  <div>Marcó un <b>dato sensible</b>. En el paso 4 deberá indicar una base de licitud reforzada (p. ej. consentimiento explícito o ejercicio de funciones de un órgano público con ley habilitante).</div>
+                </div>
+                <div class="formrow">
+                  <label>¿Incluye datos de niños, niñas o adolescentes (NNA)?</label>
+                  <div class="checks"><span class="checkpill">Sí</span><span class="checkpill on">No</span></div>
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:24px">
+                <button class="btn" data-stepnav="2">← Paso anterior</button>
+                <button class="btn btn--primary" data-stepnav="4">Siguiente: Base jurídica →</button>
+              </div>
+            </div>
+
+            <!-- Step 9 -->
+            <div class="step-panel" data-panel="9">
+              <h3 style="font-size:17px;margin-bottom:4px">Paso 9 · Revisión</h3>
+              <p class="muted" style="font-size:13px;margin:0 0 18px">Resumen completo antes de enviar. Los campos obligatorios pendientes bloquean el envío.</p>
+              <div class="callout callout--warn" style="margin-bottom:16px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+                <div>Faltan 3 campos obligatorios: <b>base de licitud</b>, <b>criterio de conservación</b>, <b>origen (detalle Mineduc)</b>.</div>
+              </div>
+              <dl class="reviewgrid">
+                <dt>Actividad</dt><dd>Acreditación socioeconómica estudiantil (FAES)</dd>
+                <dt>Unidad</dt><dd>Dir. Bienestar Estudiantil — VDE</dd>
+                <dt>Finalidad</dt><dd>Asignar beneficios estudiantiles según evaluación socioeconómica.</dd>
+                <dt>Titulares</dt><dd>Estudiantes de pregrado · apoderados</dd>
+                <dt>Datos</dt><dd>Identificativos · contacto · académicos · situación socioeconómica (sensible)</dd>
+                <dt>Base de licitud</dt><dd style="color:var(--critical)">Pendiente</dd>
+                <dt>Destinatarios</dt><dd>Mineduc · admisión (DAFE)</dd>
+                <dt>Transferencia internacional</dt><dd>No</dd>
+                <dt>Conservación</dt><dd style="color:var(--critical)">Criterio pendiente</dd>
+                <dt>Decisiones automatizadas</dt><dd>No</dd>
+                <dt>Medidas de seguridad</dt><dd>Acceso por credenciales · perfiles de solo lectura</dd>
+              </dl>
+              <div style="display:flex;justify-content:space-between;margin-top:24px;gap:10px;flex-wrap:wrap">
+                <button class="btn" data-stepnav="8">← Paso anterior</button>
+                <div style="display:flex;gap:10px">
+                  <button class="btn">Guardar como borrador</button>
+                  <button class="btn btn--primary" disabled title="Complete los 3 campos obligatorios pendientes">Enviar a revisión</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-panel" data-panel="generic">
+              <div class="card"><div class="card__b muted" style="font-size:13px">En este prototipo se detallan los pasos <b>3</b> y <b>9</b>. Los pasos 1–2 y 4–8 siguen el mismo patrón: secciones cortas, ayuda contextual con ejemplos de la hoja «Introducción» del instrumento, y validación por campo.</div></div>
+              <div style="display:flex;justify-content:space-between;margin-top:20px">
+                <button class="btn" data-stepnav="3">← Volver al paso 3</button>
+                <button class="btn btn--primary" data-stepnav="9">Ir a Revisión →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════  HISTORIAL / DIFF  ═════════════ -->
+      <section class="screen" data-screen="historial">
+        <div class="pagehead">
+          <div><div class="eyebrow mono">RAT-000024</div><h1>Historial de versiones</h1><div class="sub">4 versiones · comparando v3 ↔ v4</div></div>
+        </div>
+        <div class="grid" style="grid-template-columns:230px 1fr">
+          <div class="card"><div class="card__b" style="padding:6px">
+            <ul class="tl" style="font-size:12.5px">
+              <li style="grid-template-columns:1fr;background:var(--accent-weak);border-radius:var(--r-xs);padding:8px 10px"><div><b class="mono">v4</b> · 08-09-2026<br><span class="muted">Restauración parcial · DPD</span></div></li>
+              <li style="grid-template-columns:1fr;padding:8px 10px"><div><b class="mono">v3</b> · 02-09-2026<br><span class="muted">Envío a revisión · J. Gajardo</span></div></li>
+              <li style="grid-template-columns:1fr;padding:8px 10px"><div><b class="mono">v2</b> · 28-08-2026<br><span class="muted">Guardado manual</span></div></li>
+              <li style="grid-template-columns:1fr;padding:8px 10px"><div><b class="mono">v1</b> · 21-08-2026<br><span class="muted">Creación</span></div></li>
+            </ul>
+          </div></div>
+          <div class="card"><div class="card__b">
+            <div class="diff">
+              <div class="col"><h4>v3 · 02-09-2026</h4>
+                <div class="diffrow same">Finalidad — sin cambios</div>
+                <div class="diffrow del">Categorías de datos: Identificativos, Contacto, Académicos</div>
+                <div class="diffrow del">Descripción: «El estudiante carga antecedentes… asistentes sociales evalúan.»</div>
+                <div class="diffrow same">Transferencia internacional: No</div>
+              </div>
+              <div class="col"><h4>v4 · 08-09-2026 <span class="pill pill--observado" style="font-size:10px">actual</span></h4>
+                <div class="diffrow same">Finalidad — sin cambios</div>
+                <div class="diffrow add">Categorías de datos: + <b>Situación socioeconómica (sensible)</b></div>
+                <div class="diffrow add">Descripción: + «Asistentes administrativos solo tienen vista.»</div>
+                <div class="diffrow same">Transferencia internacional: No</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px">
+              <button class="btn btn--sm">Restaurar v3</button>
+              <span class="muted" style="font-size:12px;align-self:center">Restaurar crea una versión nueva (v5); no sobrescribe.</span>
+            </div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- ═════════════  BANDEJA DE REVISIÓN (DPD)  ═════════════ -->
+      <section class="screen" data-screen="revision">
+        <div class="pagehead">
+          <div><h1>Bandeja de revisión</h1><div class="sub">6 actividades esperando decisión del DPD</div></div>
+        </div>
+        <div class="grid" style="grid-template-columns:1fr 1.3fr">
+          <div class="tablewrap">
+            <table class="data">
+              <thead><tr><th>Código</th><th>Unidad</th><th>Antig.</th><th>Compl.</th></tr></thead>
+              <tbody>
+                <tr style="background:var(--accent-weak)"><td class="mono">RAT-000024</td><td>VDE</td><td>1 d</td><td class="tnum">73%</td></tr>
+                <tr><td class="mono">RAT-000018</td><td>VRA</td><td>4 d</td><td class="tnum">85%</td></tr>
+                <tr><td class="mono">RAT-000007</td><td>VRA</td><td>5 d</td><td class="tnum">78%</td></tr>
+                <tr><td class="mono">RAT-000029</td><td>Fac. Medicina</td><td>12 d</td><td class="tnum">64%</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card__h"><h3 class="mono" style="font-family:var(--f-mono);font-size:13px">RAT-000024 · modo revisión</h3>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn--sm btn--danger">Observar</button>
+                <button class="btn btn--sm btn--primary">Aprobar</button>
+              </div>
+            </div>
+            <div class="card__b">
+              <div class="obs">
+                <div class="obs-h"><span class="fieldref">paso 4 · base_licitud</span><span class="pill pill--observado" style="font-size:10px">obligatoria</span></div>
+                Trata situación socioeconómica (dato sensible). Debe declararse la base reforzada; si es «ejercicio de funciones de órgano público», citar la norma habilitante.
+                <div class="muted" style="font-size:11px;margin-top:6px">DPD · hoy 15:30 · abierta</div>
+              </div>
+              <div class="obs">
+                <div class="obs-h"><span class="fieldref">paso 6 · conservacion</span><span class="pill pill--borrador" style="font-size:10px">sugerida</span></div>
+                «Política institucional» no es un criterio suficiente por sí solo: indicar el documento y el plazo, o el hito que gatilla la eliminación.
+                <div class="muted" style="font-size:11px;margin-top:6px">DPD · hoy 15:31 · abierta</div>
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px">
+                <input class="selctl" style="flex:1" placeholder="Nueva observación sobre un campo…">
+                <button class="btn btn--sm">Añadir</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════  AUDITORÍA  ═════════════ -->
+      <section class="screen" data-screen="auditoria">
+        <div class="pagehead">
+          <div><h1>Consola de auditoría</h1><div class="sub">Registro inmutable · 12.480 eventos</div></div>
+          <div class="acts">
+            <button class="btn btn--sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Verificar integridad de la cadena</button>
+            <button class="btn btn--sm">Exportar</button>
+          </div>
+        </div>
+        <div class="filters">
+          <div class="search"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input placeholder="Actor, entidad, request-id…" aria-label="Buscar en auditoría"></div>
+          <select class="selctl"><option>Acción: todas</option></select>
+          <select class="selctl"><option>Resultado: todos</option></select>
+          <select class="selctl"><option>Últimos 7 días</option></select>
+        </div>
+        <div class="card"><div class="card__b" style="padding:6px 16px">
+          <ul class="tl">
+            <li><span class="tl-when">08-09 15:32:04</span><div class="tl-what"><b>MODIFICACIÓN</b> · <span class="mono">RAT-000245</span> · Fac. Medicina · campo <b>Finalidad</b><br><span class="muted">jperez · 190.98.x.x · resultado: <span style="color:var(--success)">éxito</span> · <span class="mono">req 8f2c…</span></span></div></li>
+            <li><span class="tl-when">08-09 15:30:41</span><div class="tl-what"><b>CAMBIO DE ESTADO</b> · <span class="mono">RAT-000024</span> · EN_REVISIÓN → <b>OBSERVADO</b><br><span class="muted">m.quinteros (DPD) · 2 observaciones · resultado: éxito</span></div></li>
+            <li><span class="tl-when">08-09 15:18:09</span><div class="tl-what"><b>ACCESO DENEGADO</b> · <span class="mono">RAT-000031</span><br><span class="muted">l.silva · fuera de alcance de unidad · resultado: <span style="color:var(--critical)">denegado</span></span></div></li>
+            <li><span class="tl-when">08-09 14:02:55</span><div class="tl-what"><b>INICIO DE SESIÓN</b> · MFA AAL2<br><span class="muted">j.gajardo · 200.14.x.x · resultado: éxito</span></div></li>
+            <li><span class="tl-when">08-09 09:47:12</span><div class="tl-what"><b>IMPORTACIÓN</b> · lote <span class="mono">imp-2026-0044</span> · 612 contactos + 43 borradores a staging<br><span class="muted">m.quinteros · archivo Plantilla_RAT_ISO27001_UTALCA_2026.xlsx</span></div></li>
+            <li><span class="tl-when">08-09 08:15:03</span><div class="tl-what"><b>INICIO DE SESIÓN FALLIDO</b> · 3.º intento<br><span class="muted">desconocido · 45.148.x.x · resultado: <span style="color:var(--critical)">bloqueo temporal</span></span></div></li>
+          </ul>
+        </div></div>
+      </section>
+
+      <!-- ═════════════  SEGUIMIENTO  ═════════════ -->
+      <section class="screen" data-screen="seguimiento">
+        <div class="pagehead">
+          <div><div class="eyebrow">Módulo separado del RAT</div><h1>Seguimiento del levantamiento</h1><div class="sub">Carta Gantt · 21 unidades · fase 2 «Levantamiento» en curso</div></div>
+        </div>
+        <div class="kanban">
+          <div class="kcol"><h4>No contactadas <span>2</span></h4>
+            <div class="kcard"><b>Editorial</b><span class="m">4 responsables · sin agenda</span></div>
+            <div class="kcard"><b>Fiscalía Universitaria</b><span class="m">4 responsables</span></div>
+          </div>
+          <div class="kcol"><h4>Agendadas <span>3</span></h4>
+            <div class="kcard"><b>VGEA</b><span class="m">reunión 07-09 · L. Urra</span></div>
+            <div class="kcard"><b>V. de Formación</b><span class="m">reunión 07-09</span></div>
+            <div class="kcard"><b>Dir. Aseg. de la Calidad</b><span class="m">reunión 01-09</span></div>
+          </div>
+          <div class="kcol"><h4>En seguimiento <span>4</span></h4>
+            <div class="kcard"><b>Contraloría</b><span class="m">3 campos pendientes · recordatorio enviado</span></div>
+            <div class="kcard"><b>Dir. Asuntos Jurídicos</b><span class="m">esperando respuesta</span></div>
+            <div class="kcard"><b>Dir. Comunicaciones Corp.</b><span class="m">notas por consolidar</span></div>
+          </div>
+          <div class="kcol"><h4>Levantamiento completo <span>6</span></h4>
+            <div class="kcard"><b>Vicerrectoría Académica</b><span class="m">15 actividades · consolidado</span></div>
+            <div class="kcard"><b>V. Desarrollo Estudiantil</b><span class="m">11 actividades</span></div>
+            <div class="kcard"><b>Facultad de Medicina</b><span class="m">11 actividades</span></div>
+          </div>
+        </div>
+        <div class="tablewrap" style="margin-top:16px">
+          <table class="data">
+            <caption>Detalle de gestión por unidad</caption>
+            <thead><tr><th>Unidad</th><th>Etapa</th><th>Contacto</th><th>Reunión</th><th>Gestor</th><th>Pendientes</th></tr></thead>
+            <tbody>
+              <tr><td>Contraloría</td><td><span class="pill pill--observado">En seguimiento</span></td><td class="mono">18-08</td><td class="mono">25-08</td><td>M. Quinteros</td><td>Base legal, conservación, medidas</td></tr>
+              <tr><td>VGEA</td><td><span class="pill pill--revision">Agendada</span></td><td class="mono">11-08</td><td class="mono">07-09</td><td>M. Quinteros</td><td>194 responsables por priorizar</td></tr>
+              <tr><td>Editorial</td><td><span class="pill pill--borrador">No contactada</span></td><td class="muted">—</td><td class="muted">—</td><td class="muted">—</td><td>Enviar correo de contacto</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═════════════  IMPORTACIÓN  ═════════════ -->
+      <section class="screen" data-screen="importacion">
+        <div class="pagehead">
+          <div><h1>Asistente de importación</h1><div class="sub">Excel institucional → contactos de seguimiento + borradores en staging (nunca publica)</div></div>
+        </div>
+        <div class="impsteps">
+          <span class="s ok">1 · Subir</span><span class="s ok">2 · Detectar hojas</span><span class="s ok">3 · Mapear columnas</span><span class="s ok">4 · Clasificar filas</span><span class="s on">5 · Vista previa</span><span class="s">6 · Confirmar</span>
+        </div>
+        <div class="card">
+          <div class="card__h"><h3>Vista previa — Plantilla_RAT_ISO27001_UTALCA_2026.xlsx</h3><span class="muted mono" style="font-size:12px">21 hojas · 785 filas</span></div>
+          <div class="card__b">
+            <div class="preview-nums">
+              <div class="pv"><div class="n tnum">785</div><div class="muted" style="font-size:11px">Filas encontradas</div></div>
+              <div class="pv ok"><div class="n tnum">612</div><div class="muted" style="font-size:11px">Contactos</div></div>
+              <div class="pv ok"><div class="n tnum">43</div><div class="muted" style="font-size:11px">Semillas de actividad</div></div>
+              <div class="pv"><div class="n tnum">96</div><div class="muted" style="font-size:11px">Notas de reunión</div></div>
+              <div class="pv"><div class="n tnum">34</div><div class="muted" style="font-size:11px">Vacías</div></div>
+              <div class="pv warn"><div class="n tnum">25</div><div class="muted" style="font-size:11px">Con advertencia</div></div>
+              <div class="pv err"><div class="n tnum">10</div><div class="muted" style="font-size:11px">Con error</div></div>
+            </div>
+            <div class="callout callout--info" style="margin-bottom:14px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+              <div>Las 43 semillas de actividad entran como <b>borradores en staging</b> para curación manual. Ninguna se publica como registro RAT en esta operación.</div>
+            </div>
+            <div class="tablewrap">
+              <table class="data">
+                <thead><tr><th>Hoja → Unidad</th><th>Fila</th><th>Clasificación</th><th>Validación</th><th>Mensaje</th></tr></thead>
+                <tbody>
+                  <tr><td>Vicerrectoria Academica → <b>VRA</b></td><td class="mono">2</td><td>Semilla de actividad</td><td><span class="pill pill--aprobado" style="font-size:10px">Válida</span></td><td class="muted">—</td></tr>
+                  <tr><td>Fac. Medicina → <b>(diferida)</b></td><td class="mono">3</td><td>Nota de reunión</td><td><span class="pill pill--observado" style="font-size:10px">Advertencia</span></td><td class="muted">Facultad en rama diferida · se importa a contactos</td></tr>
+                  <tr><td><b>«D° de Personas»</b> → ?</td><td class="mono">—</td><td>—</td><td><span class="pill pill--observado" style="font-size:10px">Advertencia</span></td><td class="muted">Alias ambiguo · confirmar unidad destino</td></tr>
+                  <tr><td>VDE → <b>VDE</b></td><td class="mono">4</td><td>Contacto</td><td><span class="pill pill--aprobado" style="font-size:10px">Válida</span></td><td class="muted">Jorge Gajardo · admin FAES</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+              <button class="btn">Cancelar</button>
+              <button class="btn btn--primary">Importar 645 filas válidas y con advertencia</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════════  UNIDADES (ÁRBOL)  ═════════════ -->
+      <section class="screen" data-screen="unidades">
+        <div class="pagehead">
+          <div><h1>Unidades organizacionales</h1><div class="sub">Semilla v0.1 · 106 nodos · RU N°1053-2025 · 7 por revisar</div></div>
+          <div class="acts">
+            <button class="btn btn--sm">Solo «por revisar» (7)</button>
+            <button class="btn btn--sm btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Nueva unidad</button>
+          </div>
+        </div>
+        <div class="card"><div class="card__b tree">
+          <details open><summary><svg class="caret" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg><b>Rectoría</b><span class="utype">rectoría</span></summary>
+            <div class="kids">
+              <details><summary><svg class="caret" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>Secretaría General <span class="utype">secretaría general</span></summary>
+                <div class="kids">
+                  <div class="leaf">Departamento de Registro Académico <span class="utype">departamento</span></div>
+                  <div class="leaf">Oficina de Gobierno Transparente <span class="utype">oficina</span> <span class="chip" style="font-size:10px">alias: TRANSPARENCIA</span></div>
+                  <div class="leaf">Oficina de Partes <span class="utype">oficina</span></div>
+                </div>
+              </details>
+              <details open><summary><svg class="caret" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>Vicerrectoría Académica <span class="utype">vicerrectoría</span></summary>
+                <div class="kids">
+                  <div class="leaf">Dirección de Investigación <span class="utype">dirección</span></div>
+                  <div class="leaf">Dirección de Relaciones Internacionales <span class="utype">dirección</span> <span class="chip" style="font-size:10px">alias: RRII</span></div>
+                  <div class="leaf">Dirección de Bibliotecas <span class="utype">dirección</span></div>
+                  <div class="leaf muted">Dirección de Innovación y Transferencia · Dirección de Creación …</div>
+                </div>
+              </details>
+              <details><summary><svg class="caret" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg>Vicerrectoría de Gestión Económica y Administración <span class="utype">vicerrectoría</span></summary>
+                <div class="kids">
+                  <div class="leaf">Dirección de Finanzas <span class="utype">dirección</span></div>
+                  <div class="leaf">Dirección de Personas <span class="utype">dirección</span></div>
+                  <div class="leaf">Dirección de Tecnologías de Información <span class="utype">dirección</span></div>
+                  <div class="leaf">Departamento de Desarrollo de Personas <span class="utype">departamento</span> <span class="badge-review">Por revisar</span></div>
+                </div>
+              </details>
+              <div class="leaf">Dirección de Género <span class="utype">dirección</span> <span class="badge-review">Por revisar</span> <span class="muted" style="font-size:11px">dependencia por confirmar</span></div>
+              <div class="leaf">Unidad de Convivencia Universitaria <span class="utype">unidad</span> <span class="badge-review">Por revisar</span></div>
+              <div class="leaf">Oficina de Seguridad Digital <span class="utype">oficina</span> <span class="badge-review">Por revisar</span> <span class="muted" style="font-size:11px">a cargo del proyecto RAT / DPD</span></div>
+              <div class="leaf muted">Vicerrectoría de Desarrollo Estudiantil · V. de Formación · Contraloría · Sedes · Vinculación con el Medio …</div>
+              <div class="leaf" style="opacity:.6">Facultades, Institutos y Escuelas <span class="utype">rama diferida</span> <span class="chip" style="font-size:10px">se puebla después</span></div>
+            </div>
+          </details>
+        </div></div>
+      </section>
+
+      <!-- ═════════════  USUARIOS Y ROLES  ═════════════ -->
+      <section class="screen" data-screen="usuarios">
+        <div class="pagehead">
+          <div><h1>Usuarios y roles</h1><div class="sub">Alta solo por invitación al correo institucional · sin auto-registro</div></div>
+          <div class="acts"><button class="btn btn--primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Invitar usuario</button></div>
+        </div>
+        <div class="tablewrap" style="margin-bottom:20px">
+          <table class="data">
+            <thead><tr><th>Nombre</th><th>Correo</th><th>Estado</th><th>MFA</th><th>Rol</th><th>Unidades</th></tr></thead>
+            <tbody>
+              <tr><td>María Elisa Quinteros</td><td class="mono">m.quinteros@utalca.cl</td><td><span class="pill pill--aprobado">Activo</span></td><td><span style="color:var(--success)">✓</span></td><td>DPD / Admin RAT</td><td>Todas</td></tr>
+              <tr><td>Jorge Gajardo</td><td class="mono">j.gajardo@utalca.cl</td><td><span class="pill pill--aprobado">Activo</span></td><td><span style="color:var(--success)">✓</span></td><td>Responsable de Unidad</td><td>V. Desarrollo Estudiantil</td></tr>
+              <tr><td>Rodrigo Palomo</td><td class="mono">r.palomo@utalca.cl</td><td><span class="pill pill--aprobado">Activo</span></td><td><span style="color:var(--success)">✓</span></td><td>Responsable de Unidad</td><td>Vicerrectoría Académica <span class="chip" style="font-size:10px">+ descendientes</span></td></tr>
+              <tr><td>Linda Silva</td><td class="mono">l.silva@utalca.cl</td><td><span class="pill pill--observado">Invitado</span></td><td><span class="muted">pendiente</span></td><td>Colaborador</td><td>V. Desarrollo Estudiantil</td></tr>
+              <tr><td>Contraloría — Auditoría</td><td class="mono">auditoria.interna@utalca.cl</td><td><span class="pill pill--aprobado">Activo</span></td><td><span style="color:var(--success)">✓</span></td><td>Auditor / Consulta</td><td>Todas (solo lectura)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card__h"><h3>Matriz rol × permiso</h3><button class="btn btn--sm">Editar</button></div>
+          <div class="card__b tablewrap" style="border:0;padding:0">
+            <table class="data">
+              <thead><tr><th>Permiso</th><th>Superadmin</th><th>DPD</th><th>Resp. Unidad</th><th>Colaborador</th><th>Auditor</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">activity.read.all</td><td>✓</td><td>✓</td><td>—</td><td>—</td><td>✓</td></tr>
+                <tr><td class="mono">activity.create</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>—</td></tr>
+                <tr><td class="mono">activity.submit</td><td>✓</td><td>✓</td><td>✓</td><td>—</td><td>—</td></tr>
+                <tr><td class="mono">activity.review</td><td>✓</td><td>✓</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td class="mono">unit.manage</td><td>✓</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td class="mono">audit.read</td><td>✓</td><td>✓</td><td>✓ <span class="muted">(su unidad)</span></td><td>—</td><td>✓</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- placeholders for catalogos / config nav targets -->
+      <section class="screen" data-screen="catalogos">
+        <div class="pagehead"><div><h1>Catálogos</h1><div class="sub">Vocabularios controlados · no se borran, se deprecan</div></div></div>
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+          <div class="card"><div class="card__h"><h3>Bases de licitud</h3></div><div class="card__b" style="font-size:13px;display:grid;gap:7px">
+            <div>Consentimiento <span class="chip" style="font-size:10px">ley_21719</span></div>
+            <div>Ejecución de contrato <span class="chip" style="font-size:10px">ley_21719</span></div>
+            <div>Obligación legal <span class="chip" style="font-size:10px">ley_21719</span></div>
+            <div>Interés legítimo <span class="chip" style="font-size:10px">ley_21719</span></div>
+            <div class="muted">Obligación contractual/legal <span class="chip" style="font-size:10px">deprecado → Obligación legal</span></div>
+          </div></div>
+          <div class="card"><div class="card__h"><h3>Categorías de datos</h3></div><div class="card__b" style="font-size:13px;display:grid;gap:7px">
+            <div>Identificativos · Contacto · Académicos · Laborales · Económicos</div>
+            <div style="color:var(--critical)">Sensibles: salud · biométricos · situación socioeconómica · creencias · vida sexual</div>
+          </div></div>
+        </div>
+      </section>
+      <section class="screen" data-screen="config">
+        <div class="pagehead"><div><h1>Configuración institucional</h1></div></div>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="card"><div class="card__h"><h3>Responsable del tratamiento</h3></div><div class="card__b"><div class="kv"><dt>Razón social</dt><dd>Universidad de Talca</dd></div><div class="kv"><dt>RUT</dt><dd class="mono">70.885.500-6</dd></div><div class="kv"><dt>Domicilio</dt><dd>2 Norte 685, Talca</dd></div><div class="kv"><dt>Representante legal</dt><dd>Rector/a</dd></div></div></div>
+          <div class="card"><div class="card__h"><h3>Delegado de Protección de Datos</h3></div><div class="card__b"><div class="kv"><dt>Unidad</dt><dd>Oficina de Seguridad Digital</dd></div><div class="kv"><dt>Contacto</dt><dd class="mono">dpd@utalca.cl</dd></div><div class="kv"><dt>Vigente desde</dt><dd class="mono">01-2026</dd></div></div></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═════════════  AUTH: LOGIN  ═════════════ -->
+<div class="auth screen" data-screen="login" id="loginwrap">
+  <div class="authcard">
+    <div class="brand"><div class="mark">R</div><div><b>RAT</b><span>Universidad de Talca</span></div></div>
+    <h2>Iniciar sesión</h2>
+    <p class="lede">Acceso exclusivo con cuenta institucional. Esta plataforma trata datos personales bajo la Ley 21.719.</p>
+    <div class="field"><label for="lu">Correo institucional</label><input id="lu" type="email" value="m.quinteros@utalca.cl" autocomplete="username"></div>
+    <div class="field err"><label for="lp">Contraseña</label><input id="lp" type="password" value="········" autocomplete="current-password">
+      <div class="errmsg"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4m0 4h.01"/></svg>Credenciales inválidas. Le quedan 4 intentos antes del bloqueo temporal.</div>
+    </div>
+    <button class="btn btn--primary" style="width:100%;justify-content:center" id="dologin">Continuar</button>
+    <div class="authfoot"><a href="#">¿Olvidó su contraseña?</a><a href="#">Política de privacidad</a></div>
+  </div>
+</div>
+
+<!-- ═════════════  AUTH: MFA  ═════════════ -->
+<div class="auth screen" data-screen="mfa">
+  <div class="authcard">
+    <div class="brand"><div class="mark">R</div><div><b>RAT</b><span>Universidad de Talca</span></div></div>
+    <h2>Configurar segundo factor</h2>
+    <p class="lede">Protege el acceso a datos personales. Escanee el código con Microsoft Authenticator, Google Authenticator o similar.</p>
+    <div class="qrbox">
+      <div class="qr"><svg viewBox="0 0 100 100" width="100%" height="100%" shape-rendering="crispEdges"><rect width="100" height="100" fill="#fff"/><g fill="#141b26"><rect x="6" y="6" width="26" height="26"/><rect x="12" y="12" width="14" height="14" fill="#fff"/><rect x="16" y="16" width="6" height="6" fill="#141b26"/><rect x="68" y="6" width="26" height="26"/><rect x="74" y="12" width="14" height="14" fill="#fff"/><rect x="78" y="16" width="6" height="6" fill="#141b26"/><rect x="6" y="68" width="26" height="26"/><rect x="12" y="74" width="14" height="14" fill="#fff"/><rect x="16" y="78" width="6" height="6" fill="#141b26"/><rect x="40" y="8" width="6" height="6"/><rect x="52" y="8" width="6" height="6"/><rect x="40" y="20" width="6" height="6"/><rect x="60" y="20" width="6" height="6"/><rect x="8" y="40" width="6" height="6"/><rect x="20" y="40" width="6" height="6"/><rect x="40" y="40" width="6" height="6"/><rect x="52" y="46" width="6" height="6"/><rect x="64" y="40" width="6" height="6"/><rect x="80" y="44" width="6" height="6"/><rect x="88" y="52" width="6" height="6"/><rect x="40" y="60" width="6" height="6"/><rect x="48" y="66" width="6" height="6"/><rect x="60" y="64" width="6" height="6"/><rect x="72" y="72" width="6" height="6"/><rect x="84" y="80" width="6" height="6"/><rect x="44" y="84" width="6" height="6"/><rect x="56" y="88" width="6" height="6"/></g></svg></div>
+      <div style="font-size:12px"><div class="muted">O ingrese la clave manualmente:</div><div class="mono" style="margin-top:4px;word-break:break-all">JBSW Y3DP EHPK 3PXP</div></div>
+    </div>
+    <div class="field"><label>Código de 6 dígitos</label>
+      <div class="otp"><input maxlength="1" inputmode="numeric" value="4"><input maxlength="1" inputmode="numeric" value="8"><input maxlength="1" inputmode="numeric" value="1"><input maxlength="1" inputmode="numeric" value="9"><input maxlength="1" inputmode="numeric" value="0"><input maxlength="1" inputmode="numeric" value="2"></div>
+    </div>
+    <div class="field"><label>Códigos de recuperación <span class="hint">— guárdelos en un lugar seguro</span></label>
+      <div class="reccodes">3f9a-22b7<br>c1d8-40e5<br>a77e-9b02<br>18cc-6d3f<br>e0b4-51a9<br>7d2f-3c8e</div>
+    </div>
+    <button class="btn btn--primary" style="width:100%;justify-content:center" id="domfa">Verificar y entrar</button>
+    <div class="authfoot"><a href="#">Usar un código de recuperación</a></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement, app=document.getElementById('app');
+  var AUTH=['login','mfa'];
+
+  /* theme */
+  var tb=document.getElementById('themebtn');
+  tb && tb.addEventListener('click',function(){
+    var cur=root.getAttribute('data-theme');
+    if(!cur){cur=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+    root.setAttribute('data-theme', cur==='dark'?'light':'dark');
+  });
+
+  /* router */
+  function show(id){
+    if(!id) id='tablero';
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.toggle('active', s.dataset.screen===id); });
+    var isAuth=AUTH.indexOf(id)>-1;
+    app.classList.toggle('is-auth', isAuth);
+    document.getElementById('loginwrap'); // noop
+    // route dashboard by role
+    if(id==='tablero' && role==='unit'){ swapTo('tablero-unidad'); }
+    document.querySelectorAll('[data-nav]').forEach(function(a){
+      a.classList.toggle('active', a.getAttribute('href')==='#'+id || (id==='tablero-unidad'&&a.getAttribute('href')==='#tablero'));
+    });
+    if(!isAuth) window.scrollTo(0,0);
+  }
+  function swapTo(id){
+    document.querySelectorAll('.screen').forEach(function(s){ s.classList.toggle('active', s.dataset.screen===id); });
+  }
+  window.addEventListener('hashchange',function(){ show(location.hash.slice(1)); });
+
+  /* role */
+  var role='dpd';
+  var rs=document.getElementById('rolesel');
+  function applyRole(){
+    document.body.setAttribute('data-role',role);
+    document.querySelectorAll('[data-perm]').forEach(function(el){
+      var p=el.getAttribute('data-perm');
+      var ok = (p==='admin' && role==='admin') || (p==='dpd' && (role==='dpd'||role==='admin'));
+      el.style.display= ok ? '' : 'none';
+    });
+    var lbl=document.getElementById('unitsel-label');
+    if(role==='unit'){ lbl.textContent='Vicerrectoría Académica'; }
+    else { lbl.textContent='Todas las unidades'; }
+    var cur=(location.hash.slice(1))||'tablero';
+    if(cur==='tablero'||cur==='tablero-unidad') show('tablero');
+  }
+  rs && rs.addEventListener('change',function(){ role=rs.value; applyRole(); });
+
+  /* in-page navigation helpers */
+  document.addEventListener('click',function(e){
+    var g=e.target.closest('[data-goto]'); if(g){ location.hash=g.getAttribute('data-goto'); }
+    var r=e.target.closest('[data-stepnav]'); if(r){ gotoStep(r.getAttribute('data-stepnav')); }
+    var cp=e.target.closest('.checkpill'); if(cp){ cp.classList.toggle('on'); }
+  });
+  document.getElementById('gotologin').addEventListener('click',function(){ location.hash='login'; });
+  document.getElementById('dologin').addEventListener('click',function(){ location.hash='mfa'; });
+  document.getElementById('domfa').addEventListener('click',function(){ location.hash='tablero'; });
+
+  /* wizard steps */
+  var stepBtns=document.querySelectorAll('#steps button');
+  function gotoStep(n){
+    var panels={'3':'3','9':'9'};
+    var key=panels[n]||'generic';
+    document.querySelectorAll('.step-panel').forEach(function(p){ p.classList.toggle('active', p.dataset.panel===key); });
+    stepBtns.forEach(function(b){ b.classList.toggle('active', b.dataset.step===String(n)); });
+  }
+  stepBtns.forEach(function(b){ b.addEventListener('click',function(){ gotoStep(b.dataset.step); }); });
+
+  /* init */
+  applyRole();
+  show((location.hash.slice(1))||'tablero');
+})();
+</script>

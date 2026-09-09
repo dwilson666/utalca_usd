@@ -1,0 +1,34 @@
+# Configuración del proyecto Supabase local. Ajustar project_id al crear el proyecto remoto.
+project_id = "rat-utalca"
+
+[db]
+port = 54322
+major_version = 15
+
+[db.pooler]
+enabled = false
+
+[auth]
+enable_signup = false            # alta SOLO por invitación (ver contrato §D12)
+enable_confirmations = true
+minimum_password_length = 12
+
+[auth.mfa]
+max_enrolled_factors = 3
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+# Preparado para SSO institucional (Microsoft Entra ID) — activar cuando esté disponible.
+# [auth.external.azure]
+# enabled = true
+# client_id = "env(AZURE_CLIENT_ID)"
+# secret = "env(AZURE_SECRET)"
+# url = "https://login.microsoftonline.com/<tenant-id>/v2.0"
+
+[studio]
+enabled = true
+
+[edge_runtime]
+enabled = true
