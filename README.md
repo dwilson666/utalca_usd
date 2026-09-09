@@ -14,13 +14,14 @@ Stack (capa gratuita): **Supabase** (PostgreSQL + Auth + RLS + Storage + Edge Fu
 | Suite de autorización — **15/15 pruebas en verde** (10 casos del contrato + 5 extras) | ✅ `supabase/tests/authz_matrix_test.sql` |
 | Frontend `apps/web` (auth+MFA, shell, tableros, lista/detalle de actividad, transiciones) | ✅ `pnpm typecheck` + `vite build` OK |
 | `packages/shared` (permisos, enums, Zod, helpers de authz) | ✅ typecheck OK |
-| Edge Function `users-invite` | 🟡 escrita, sin `deno check` local |
-| CI (GitHub Actions: db test + typecheck + build) | ✅ `.github/workflows/ci.yml` |
+| Edge Function `users-invite` | ✅ `deno check` OK |
+| **CI (GitHub Actions)** — `database` (`supabase db reset` + `supabase test db`) · `web` (typecheck + build) · `functions` (`deno check`) | ✅ **los 3 jobs en verde** · `supabase test db` → `Tests=15, Result: PASS` |
 | Wizard de 9 pasos · importación · exportación · consola de auditoría · admin UI | ⏳ pendiente |
 
-> Verificado en un **PostgreSQL 16 vanilla** con el shim `scripts/local_pg_shim.sql`
-> (recrea el esquema `auth` de Supabase). No necesita Docker. Falta aplicar las
-> migraciones al proyecto Supabase real y desplegar. Ver [`docs/PUESTA_EN_MARCHA.md`](docs/PUESTA_EN_MARCHA.md).
+> Verificado dos veces: (1) local, PostgreSQL vanilla + `scripts/local_pg_shim.sql` (sin Docker);
+> (2) CI de GitHub, stack local de Supabase real (`pg_prove`). **15/15 pruebas de autorización.**
+> Falta aplicar las migraciones al proyecto Supabase de producción y desplegar el frontend.
+> Ver [`docs/PUESTA_EN_MARCHA.md`](docs/PUESTA_EN_MARCHA.md).
 
 Documentos de fases previas (fuente de verdad), en [`docs/`](docs/): análisis (Fase 1), arquitectura (Fase 2), UX/UI (Fase 3) + `mockup_rat_utalca.html`, contrato de autorización (Fase 4a), políticas RLS, y puesta en marcha.
 
