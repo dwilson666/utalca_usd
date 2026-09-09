@@ -70,5 +70,6 @@ parts.append("")
 parts.append("select app.rebuild_unit_closure();")
 parts.append("reset app.bootstrap;")
 
-out.write_text("\n".join(parts) + "\n", encoding="utf-8")
+# newline="\n": salida LF en todas las plataformas (evita ruido de CRLF en git)
+out.write_text("\n".join(parts) + "\n", encoding="utf-8", newline="\n")
 print(f"{len(units)} unidades -> {out.relative_to(ROOT)}")

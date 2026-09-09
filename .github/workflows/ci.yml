@@ -17,11 +17,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Regenerar seed de unidades
+      - name: Verificar que el seed de unidades está al día
         run: |
           python scripts/gen_units_seed.py
-          git diff --exit-code supabase/seed/units.sql \
-            || (echo "::error::supabase/seed/units.sql desactualizado — corre pnpm gen:units" && exit 1)
+          if ! git diff --exit-code -- supabase/seed/units.sql; then
+            echo "::error::supabase/seed/units.sql desactualizado — corre 'pnpm gen:units' y commitea"
+            exit 1
+          fi
 
       - uses: supabase/setup-cli@v1
         with:
@@ -46,8 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
