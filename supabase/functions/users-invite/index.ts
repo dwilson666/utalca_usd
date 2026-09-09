@@ -2,8 +2,8 @@
 // Invita un usuario por correo institucional y le asigna rol + unidades.
 // AUTORIZACIÓN (capa 2): el llamador debe tener `user.manage`. Se verifica con
 // SU JWT antes de usar el service_role. El alta por auto-registro está deshabilitada.
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import { z } from 'https://esm.sh/zod@3.23.8';
+import { createClient } from '@supabase/supabase-js';
+import { z } from 'zod';
 
 const inviteSchema = z.object({
   email: z.string().email().endsWith('@utalca.cl'),

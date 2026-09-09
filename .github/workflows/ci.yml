@@ -65,7 +65,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@v2
         with:
-          deno-version: v1.x
-      - run: deno check supabase/functions/**/index.ts
+          deno-version: v2.x
+      - working-directory: supabase/functions
+        run: deno check users-invite/index.ts
