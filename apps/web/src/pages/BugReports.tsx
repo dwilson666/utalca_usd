@@ -95,18 +95,21 @@ export function BugReports() {
           <div style={{ display: 'grid', gap: 10 }}>
             {(q.data ?? []).map((bug) => (
               <div key={bug.id} className="card">
-                <button
+                <div
+                  role="button"
+                  tabIndex={0}
                   onClick={() => setOpenId(openId === bug.id ? null : bug.id)}
+                  onKeyDown={(e) =>
+                    (e.key === 'Enter' || e.key === ' ') &&
+                    setOpenId(openId === bug.id ? null : bug.id)
+                  }
                   style={{
-                    all: 'unset',
                     cursor: 'pointer',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     gap: 12,
                     padding: '12px 14px',
-                    width: '100%',
-                    boxSizing: 'border-box',
                   }}
                 >
                   <span>
@@ -118,7 +121,7 @@ export function BugReports() {
                   <span className="muted" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
                     {bug.reporter_email ?? '—'} · {new Date(bug.created_at).toLocaleString('es-CL')}
                   </span>
-                </button>
+                </div>
 
                 {openId === bug.id && (
                   <div style={{ padding: '0 14px 14px', borderTop: '1px solid var(--border)' }}>
