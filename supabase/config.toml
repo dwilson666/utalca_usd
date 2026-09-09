@@ -8,6 +8,11 @@ major_version = 15
 [db.pooler]
 enabled = false
 
+[db.seed]
+enabled = true
+# Orden importa: base (roles/permisos/catálogos/config) → unidades → seguimiento.
+sql_paths = ["./seed.sql", "./seed/units.sql", "./seed/engagements.sql"]
+
 [auth]
 enable_signup = false            # alta SOLO por invitación (ver contrato §D12)
 enable_confirmations = true

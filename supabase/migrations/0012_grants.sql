@@ -39,7 +39,7 @@ grant execute on all functions in schema app to authenticated;
 
 -- funciones internas (triggers / mantenimiento): revocar de authenticated
 revoke execute on function
-  app.write_audit(audit_action,text,uuid,uuid,text,text,text[],jsonb,audit_result,jsonb),
+  app.write_audit(audit_action,text,text,uuid,text,text,text[],jsonb,audit_result,jsonb),
   app.rebuild_unit_closure(),
   app.handle_new_auth_user(),
   app.refresh_unit_kpi_cache(),

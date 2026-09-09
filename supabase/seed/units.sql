@@ -1,6 +1,6 @@
 -- GENERADO por scripts/gen_units_seed.py desde seed-data/organizational_units.v0.1.json
 -- No editar a mano. Idempotente (on conflict do nothing / update por code).
-set local app.bootstrap = 'on';
+set app.bootstrap = 'on';
 
 insert into organizational_units (code,name_official,name_short,acronym,type,campus,is_rat_unit,deferred,needs_review,sort_order,external_ref,notes) values
   ('CS','Consejo Superior','Consejo Superior','CS','consejo',null,false,false,false,1,'RU N°1053-2025',null),
@@ -258,4 +258,4 @@ insert into organizational_unit_aliases (unit_id,alias,source,is_primary) select
 insert into organizational_unit_aliases (unit_id,alias,source,is_primary) select id,'EDITORIAL','instrumento_2026',true from organizational_units where code = 'EDIT' on conflict (alias,source) do nothing;
 
 select app.rebuild_unit_closure();
-set local app.bootstrap = 'off';
+reset app.bootstrap;

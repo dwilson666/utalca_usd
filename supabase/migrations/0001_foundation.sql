@@ -159,7 +159,7 @@ create table data_protection_officer (
   id          uuid primary key default gen_random_uuid(),
   name        text not null,
   unit_label  text,
-  email       citext,
+  email       text,
   address     text,
   valid_from  date not null default now(),
   valid_to    date

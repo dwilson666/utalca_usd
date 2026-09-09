@@ -13,7 +13,7 @@ create table audit_log (
   actor_user_agent text,
   action         audit_action not null,
   entity_type    text,
-  entity_id      uuid,
+  entity_id      text,          -- id de la entidad como texto (uuid, int, clave compuesta…)
   unit_id        uuid,
   previous_state text,
   new_state      text,
@@ -40,7 +40,7 @@ create index on audit_log (actor_user_id, occurred_at desc);
 create or replace function app.write_audit(
   p_action audit_action,
   p_entity_type text default null,
-  p_entity_id uuid default null,
+  p_entity_id text default null,
   p_unit_id uuid default null,
   p_previous_state text default null,
   p_new_state text default null,
@@ -83,43 +83,48 @@ begin
     p_metadata);
 end $$;
 
--- Trigger genérico para tablas de negocio.
+-- Trigger genérico para tablas de negocio. Agnóstico a la forma de la fila
+-- (usa to_jsonb, así funciona igual con id uuid, id int o clave de texto).
 create or replace function app.trg_audit() returns trigger
 language plpgsql security definer set search_path = app, public, extensions as $$
 declare
+  jnew jsonb := case when tg_op <> 'DELETE' then to_jsonb(new) end;
+  jold jsonb := case when tg_op <> 'INSERT' then to_jsonb(old) end;
   v_unit uuid;
+  v_entity text;
   v_changed text[];
   v_diff jsonb;
   v_prev text; v_new text;
 begin
-  -- unidad afectada (best-effort por tabla)
+  v_entity := coalesce(jnew ->> 'id', jold ->> 'id', jnew ->> 'key', jold ->> 'key');
+
   if tg_table_name = 'processing_activities' then
-    v_unit := coalesce(new.responsible_unit_id, old.responsible_unit_id);
-    v_prev := old.status::text; v_new := new.status::text;
+    v_unit := coalesce(jnew ->> 'responsible_unit_id', jold ->> 'responsible_unit_id')::uuid;
+    v_prev := jold ->> 'status'; v_new := jnew ->> 'status';
   elsif tg_table_name = 'organizational_units' then
-    v_unit := coalesce(new.id, old.id);
-    v_prev := old.rat_status::text; v_new := new.rat_status::text;
+    v_unit := coalesce(jnew ->> 'id', jold ->> 'id')::uuid;
+    v_prev := jold ->> 'rat_status'; v_new := jnew ->> 'rat_status';
   elsif tg_table_name like 'activity\_%' then
     select responsible_unit_id into v_unit from processing_activities
-      where id = coalesce(new.activity_id, old.activity_id);
+      where id = coalesce(jnew ->> 'activity_id', jold ->> 'activity_id')::uuid;
   end if;
 
   if tg_op = 'UPDATE' then
     select array_agg(key), jsonb_object_agg(key, jsonb_build_object('old', o.value, 'new', n.value))
       into v_changed, v_diff
-    from jsonb_each(to_jsonb(old)) o
-    join jsonb_each(to_jsonb(new)) n using (key)
+    from jsonb_each(jold) o
+    join jsonb_each(jnew) n using (key)
     where o.value is distinct from n.value and key not in ('updated_at','updated_by');
   end if;
 
   perform app.write_audit(
     case tg_op when 'INSERT' then 'create' when 'DELETE' then 'delete' else 'update' end::audit_action,
-    tg_table_name,
-    coalesce(new.id, old.id),
+    tg_table_name::text,
+    v_entity,
     v_unit,
     case when tg_op = 'UPDATE' then v_prev end,
     case when tg_op = 'UPDATE' then v_new end,
-    v_changed, v_diff, 'success', null);
+    v_changed, v_diff, 'success'::audit_result, null::jsonb);
 
   return coalesce(new, old);
 end $$;

@@ -102,8 +102,8 @@ begin
     summary = summary || jsonb_build_object('contacts_created', v_contacts, 'activity_drafts_created', v_seeds)
     where id = p_batch;
 
-  perform app.write_audit('import', 'import_batches', p_batch, null, null, null, null,
-    jsonb_build_object('contacts', v_contacts, 'drafts', v_seeds), 'success', null);
+  perform app.write_audit('import', 'import_batches', p_batch::text, null, null, null, null,
+    jsonb_build_object('contacts', v_contacts, 'drafts', v_seeds), 'success'::audit_result, null::jsonb);
 
   return jsonb_build_object('contacts_created', v_contacts, 'activity_drafts_created', v_seeds);
 end $$;

@@ -200,11 +200,6 @@ insert into campuses (code,label,sort_order) values
   ('colchagua','Colchagua (Santa Cruz)',3),('santiago','Santiago',4)
 on conflict (code) do nothing;
 
--- ── árbol de unidades (generado) ───────────────────────────────────────────
-\i seed/units.sql
-
--- ── estado de seguimiento inicial por unidad ──────────────────────────────
-insert into unit_engagements (unit_id, stage)
-select id, 'no_contactada' from organizational_units
-where is_rat_unit and not deferred
-on conflict (unit_id) do nothing;
+-- El árbol de unidades y el seguimiento inicial se cargan a continuación desde
+-- seed/units.sql y seed/engagements.sql (ver config.toml → [db.seed].sql_paths,
+-- que los ejecuta en orden). Sin \i / \ir para no depender del parser de psql.

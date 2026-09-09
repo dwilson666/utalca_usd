@@ -40,8 +40,8 @@ begin
   insert into unit_rat_status_transitions(unit_id, from_state, to_state, actor_user_id, comment)
   values (p_unit, v_from, p_to, auth.uid(), p_comment);
 
-  perform app.write_audit('unit_state_change', 'organizational_units', p_unit, p_unit,
-    v_from::text, p_to::text, array['rat_status'], null, 'success',
+  perform app.write_audit('unit_state_change', 'organizational_units', p_unit::text, p_unit,
+    v_from::text, p_to::text, array['rat_status'], null::jsonb, 'success'::audit_result,
     jsonb_build_object('comment', p_comment));
 
   return p_to;

@@ -6,7 +6,7 @@
 -- ════════════════════════════════════════════════════════════════════════════
 begin;
 create schema if not exists tests;
-select plan(16);
+select plan(15);
 
 -- ── helper de identidad ───────────────────────────────────────────────────
 create or replace function tests.act_as(p_user uuid, p_aal text default 'aal2')
@@ -22,6 +22,10 @@ begin
   perform set_config('role', 'postgres', true);
   perform set_config('request.jwt.claims', null, true);
 end $$;
+
+-- las funciones de conmutación de identidad deben poder llamarse desde cualquier rol
+grant usage on schema tests to public;
+grant execute on all functions in schema tests to public;
 
 -- ── fixtures ──────────────────────────────────────────────────────────────
 -- ids fijos
@@ -72,12 +76,11 @@ select is(
   (select count(*)::int from processing_activities where id = '00000000-0000-0000-0000-00000000ac0b'),
   0, 'Caso 1: colaborador de A NO ve la actividad de B');
 
--- Caso 2 — Usuario de A hace UPDATE de una actividad de B → 0 filas afectadas
-select is(
-  (with u as (update processing_activities set title = 'HACKEADO'
-              where id = '00000000-0000-0000-0000-00000000ac0b' returning 1)
-   select count(*)::int from u),
-  0, 'Caso 2: UPDATE de A sobre actividad de B no afecta filas');
+-- Caso 2 — Usuario de A hace UPDATE de una actividad de B → RLS filtra (0 filas, sin error)
+select lives_ok(
+  $$ update processing_activities set title = 'HACKEADO'
+     where id = '00000000-0000-0000-0000-00000000ac0b' $$,
+  'Caso 2: UPDATE de A sobre actividad de B no afecta filas (RLS)');
 select tests.act_as_postgres();
 select is(
   (select title from processing_activities where id = '00000000-0000-0000-0000-00000000ac0b'),
@@ -159,14 +162,14 @@ select is(
 -- Extra 4 — un superadmin tampoco puede modificar SUS PROPIOS roles (self-guard)
 select tests.act_as_postgres();
 insert into auth.users (id,email,aud,role) values
-  ('00000000-0000-0000-0000-0000000000s1','super@utalca.cl','authenticated','authenticated')
+  ('00000000-0000-0000-0000-0000000005a1','super@utalca.cl','authenticated','authenticated')
   on conflict do nothing;
 insert into user_roles (user_id, role_id, scope)
-  values ('00000000-0000-0000-0000-0000000000s1',(select id from roles where code='superadmin'),'global');
-select tests.act_as('00000000-0000-0000-0000-0000000000s1');
+  values ('00000000-0000-0000-0000-0000000005a1',(select id from roles where code='superadmin'),'global');
+select tests.act_as('00000000-0000-0000-0000-0000000005a1');
 select throws_ok(
   $$ update user_roles set scope='global'
-     where user_id='00000000-0000-0000-0000-0000000000s1' $$,
+     where user_id='00000000-0000-0000-0000-0000000005a1' $$,
   '42501', null, 'Extra: ni un superadmin edita sus propios roles (anti-autoelevación)');
 
 select * from finish();

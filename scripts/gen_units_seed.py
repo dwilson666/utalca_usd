@@ -20,7 +20,7 @@ def q(s):
 parts = [
     "-- GENERADO por scripts/gen_units_seed.py desde seed-data/organizational_units.v0.1.json",
     "-- No editar a mano. Idempotente (on conflict do nothing / update por code).",
-    "set local app.bootstrap = 'on';",
+    "set app.bootstrap = 'on';",
     "",
     "insert into organizational_units "
     "(code,name_official,name_short,acronym,type,campus,is_rat_unit,deferred,needs_review,sort_order,external_ref,notes) values",
@@ -68,7 +68,7 @@ for x in units:
         )
 parts.append("")
 parts.append("select app.rebuild_unit_closure();")
-parts.append("set local app.bootstrap = 'off';")
+parts.append("reset app.bootstrap;")
 
 out.write_text("\n".join(parts) + "\n", encoding="utf-8")
 print(f"{len(units)} unidades -> {out.relative_to(ROOT)}")
