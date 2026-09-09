@@ -179,6 +179,22 @@ Casos adicionales incluidos en la suite: sesión sin MFA (aal1) → denegado en 
 
 ---
 
+## 8bis. Desviación temporal — MFA (migración `…120114_mfa_toggle`)
+
+`D1` exige **MFA TOTP obligatorio**. Para la fase de **revisión con la jefatura**
+(enlace compartido, mínima fricción), la Unidad de Seguridad Digital decide
+desactivarlo temporalmente mediante política configurable:
+
+`app_settings['auth.require_mfa']` = `false` → `app.is_mfa()` acepta AAL1;
+el frontend omite el flujo de inscripción/desafío TOTP.
+
+Es **reversible en una línea** y todo el código MFA se conserva:
+```sql
+update app_settings set value = 'true' where key = 'auth.require_mfa';
+```
+más habilitar TOTP a nivel de proyecto en el dashboard de Supabase.
+**Antes de producción con datos reales, `auth.require_mfa` vuelve a `true`.**
+
 ## 9. Registro de cambios sobre diseño previo
 
 1. **Fase 3 · selector de Rol** → eliminado de producción (D13). El mockup se conserva como referencia visual; el build de producción resuelve rol y vista del usuario autenticado.
