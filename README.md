@@ -9,17 +9,18 @@ Stack (capa gratuita): **Supabase** (PostgreSQL + Auth + RLS + Storage + Edge Fu
 | Componente | Estado |
 |---|---|
 | Contrato de autorización y segregación | ✅ [`docs/Fase4a_Contrato_Autorizacion.md`](docs/Fase4a_Contrato_Autorizacion.md) |
-| Migraciones PostgreSQL (esquema + RLS + funciones + triggers) | 🟡 escritas, **sin verificar contra BD** — `supabase/migrations/0001`–`0013` |
-| Seed (permisos, roles, catálogos, 106 unidades) | 🟡 escrito — `supabase/seed.sql` + `supabase/seed/units.sql` |
-| Suite de pruebas de autorización (10 casos + extras) | 🟡 escrita — `supabase/tests/authz_matrix_test.sql` (correr con `supabase test db`) |
-| Frontend `apps/web` (auth+MFA, shell, tableros, lista/detalle de actividad, transiciones) | 🟡 escrito, **sin compilar** — falta Node en la máquina de origen |
-| `packages/shared` (permisos, enums, Zod, helpers de authz) | 🟡 escrito |
-| Edge Function `users-invite` | 🟡 escrita |
+| Migraciones PostgreSQL (esquema + RLS + funciones + triggers) | ✅ aplican sin error en PostgreSQL 16 — `supabase/migrations/0001`–`0013` |
+| Seed (permisos, roles, catálogos, 106 unidades) | ✅ `supabase/seed.sql` + `supabase/seed/{units,engagements}.sql` |
+| Suite de autorización — **15/15 pruebas en verde** (10 casos del contrato + 5 extras) | ✅ `supabase/tests/authz_matrix_test.sql` |
+| Frontend `apps/web` (auth+MFA, shell, tableros, lista/detalle de actividad, transiciones) | ✅ `pnpm typecheck` + `vite build` OK |
+| `packages/shared` (permisos, enums, Zod, helpers de authz) | ✅ typecheck OK |
+| Edge Function `users-invite` | 🟡 escrita, sin `deno check` local |
 | CI (GitHub Actions: db test + typecheck + build) | ✅ `.github/workflows/ci.yml` |
-| Wizard de 9 pasos · importación · exportación · consola de auditoría | ⏳ pendiente |
+| Wizard de 9 pasos · importación · exportación · consola de auditoría · admin UI | ⏳ pendiente |
 
-> **🟡 = sin ejecutar.** La máquina donde se generó no tiene Node, Docker, Supabase CLI ni psql.
-> Ver [`docs/PUESTA_EN_MARCHA.md`](docs/PUESTA_EN_MARCHA.md) para validar (local o vía CI + nube).
+> Verificado en un **PostgreSQL 16 vanilla** con el shim `scripts/local_pg_shim.sql`
+> (recrea el esquema `auth` de Supabase). No necesita Docker. Falta aplicar las
+> migraciones al proyecto Supabase real y desplegar. Ver [`docs/PUESTA_EN_MARCHA.md`](docs/PUESTA_EN_MARCHA.md).
 
 Documentos de fases previas (fuente de verdad), en [`docs/`](docs/): análisis (Fase 1), arquitectura (Fase 2), UX/UI (Fase 3) + `mockup_rat_utalca.html`, contrato de autorización (Fase 4a), políticas RLS, y puesta en marcha.
 
