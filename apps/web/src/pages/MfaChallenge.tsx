@@ -12,7 +12,7 @@ export function MfaChallenge() {
   const [busy, setBusy] = useState(false);
 
   if (!session) return <Navigate to="/login" replace />;
-  if (mfa === 'verified') return <Navigate to="/" replace />;
+  if (mfa === 'verified' || mfa === 'not_required') return <Navigate to="/" replace />;
   if (mfa === 'not_enrolled') return <Navigate to="/mfa/inscribir" replace />;
 
   async function verify(e: FormEvent) {

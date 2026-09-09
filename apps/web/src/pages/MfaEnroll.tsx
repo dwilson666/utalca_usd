@@ -30,7 +30,7 @@ export function MfaEnroll() {
   }, [session]);
 
   if (!session) return <Navigate to="/login" replace />;
-  if (mfa === 'verified') return <Navigate to="/" replace />;
+  if (mfa === 'verified' || mfa === 'not_required') return <Navigate to="/" replace />;
 
   async function verify(e: FormEvent) {
     e.preventDefault();

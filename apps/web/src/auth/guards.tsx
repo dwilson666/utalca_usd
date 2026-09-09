@@ -7,15 +7,16 @@ function Splash({ label }: { label: string }) {
   return <div className="authwrap"><p className="muted">{label}</p></div>;
 }
 
-/** Sesión + MFA (aal2) obligatorios para TODA la app autenticada. */
+/** Sesión + segundo factor (cuando la política lo exige) para toda la app. */
 export function RequireSession({ children }: { children: ReactNode }) {
-  const { loading, session, mfa } = useAuth();
+  const { loading, session, mfa, mfaSatisfied } = useAuth();
   const loc = useLocation();
   if (loading) return <Splash label="Cargando…" />;
   if (!session) return <Navigate to="/login" replace state={{ from: loc.pathname }} />;
   if (mfa === 'not_enrolled') return <Navigate to="/mfa/inscribir" replace />;
-  if (mfa === 'needs_challenge') return <Navigate to="/mfa/verificar" replace state={{ from: loc.pathname }} />;
-  if (mfa !== 'verified') return <Splash label="Verificando segundo factor…" />;
+  if (mfa === 'needs_challenge')
+    return <Navigate to="/mfa/verificar" replace state={{ from: loc.pathname }} />;
+  if (!mfaSatisfied) return <Splash label="Verificando segundo factor…" />;
   return <>{children}</>;
 }
 

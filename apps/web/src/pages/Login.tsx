@@ -3,10 +3,19 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 import { supabase } from '../lib/supabase';
 
+const DOMAIN = '@utalca.cl';
+
+/** Normaliza lo que el usuario escribe a un correo institucional completo. */
+function toInstitutionalEmail(input: string): string {
+  const v = input.trim().toLowerCase();
+  if (!v) return v;
+  return v.includes('@') ? v : v + DOMAIN;
+}
+
 export function Login() {
   const { session, loading } = useAuth();
   const loc = useLocation();
-  const [email, setEmail] = useState('');
+  const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -20,14 +29,14 @@ export function Login() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: toInstitutionalEmail(user),
+      password,
+    });
     setBusy(false);
     if (error) {
-      // Mensaje genérico: no revelar si el correo existe.
-      setError('Credenciales inválidas.');
-      return;
+      setError('Credenciales inválidas.'); // mensaje genérico: no revela si el usuario existe
     }
-    // onAuthStateChange en AuthProvider hidrata la sesión y decide MFA.
   }
 
   return (
@@ -38,17 +47,46 @@ export function Login() {
           Acceso exclusivo con cuenta institucional. Esta plataforma trata datos personales bajo la
           Ley 21.719.
         </p>
+
         <div className="field">
-          <label htmlFor="email">Correo institucional</label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="username"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+          <label htmlFor="user">Usuario institucional</label>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'stretch',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--r-sm)',
+              overflow: 'hidden',
+              background: 'var(--ground)',
+            }}
+          >
+            <input
+              id="user"
+              autoComplete="username"
+              autoFocus
+              value={user}
+              onChange={(e) => setUser(e.target.value)}
+              required
+              style={{ border: 0, background: 'transparent', flex: 1 }}
+            />
+            {!user.includes('@') && (
+              <span
+                aria-hidden
+                style={{
+                  display: 'grid',
+                  placeItems: 'center',
+                  padding: '0 11px',
+                  color: 'var(--ink-muted)',
+                  fontSize: 13,
+                  borderLeft: '1px solid var(--border)',
+                }}
+              >
+                {DOMAIN}
+              </span>
+            )}
+          </div>
         </div>
+
         <div className="field">
           <label htmlFor="password">Contraseña</label>
           <input
@@ -61,7 +99,12 @@ export function Login() {
           />
           {error && <div className="errmsg">{error}</div>}
         </div>
-        <button className="btn btn--primary" style={{ width: '100%', justifyContent: 'center' }} disabled={busy}>
+
+        <button
+          className="btn btn--primary"
+          style={{ width: '100%', justifyContent: 'center' }}
+          disabled={busy}
+        >
           {busy ? 'Verificando…' : 'Continuar'}
         </button>
         <p className="muted" style={{ fontSize: 12, marginTop: 16 }}>

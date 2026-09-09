@@ -9,6 +9,8 @@ export default defineConfig({
       '@rat/shared': resolve(import.meta.dirname, '../../packages/shared/src/index.ts'),
     },
   },
-  server: { port: 5173 },
+  // allowedHosts: true permite servir a través de un túnel (*.trycloudflare.com)
+  server: { port: 5173, allowedHosts: true },
+  preview: { port: 4173, allowedHosts: true },
   build: { outDir: 'dist', sourcemap: true },
 });

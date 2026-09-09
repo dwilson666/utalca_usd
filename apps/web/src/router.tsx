@@ -13,7 +13,10 @@ import { ActivityDetail } from './pages/ActivityDetail';
 import { NoUnit, NotFound, SimplePage, Unauthorized, WizardStub } from './pages/Misc';
 
 function Home() {
-  const { authz } = useAuth();
+  const { authz, loading } = useAuth();
+  if (loading || !authz.user_id) {
+    return <div className="authwrap"><p className="muted">Cargando…</p></div>;
+  }
   return <Navigate to={landingRoute(authz)} replace />;
 }
 
