@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { can, ROLE_LABELS, type RoleCode } from '@rat/shared';
 import { useAuth } from '../auth/AuthProvider';
+import { BugButton } from './BugButton';
 
 /** Sin selector de rol (D13): el rol y la vista se derivan del usuario autenticado. */
 export function AppShell() {
@@ -42,6 +43,9 @@ export function AppShell() {
         {can(authz, 'tracking.read.all') && (
           <NavLink to="/seguimiento" className={navcls}>Seguimiento</NavLink>
         )}
+        {authz.institutional && (
+          <NavLink to="/reportes" className={navcls}>Reportes de errores</NavLink>
+        )}
 
         {can(authz, 'user.manage') && (
           <>
@@ -61,6 +65,7 @@ export function AppShell() {
         <div className="topbar">
           <span className="rolebadge">{roleLabel}</span>
           <div className="spacer" />
+          <BugButton />
           <span className="muted mono" style={{ fontSize: 12 }}>{session?.user.email}</span>
           <button className="btn btn--ghost" onClick={() => void signOut()}>
             Cerrar sesión

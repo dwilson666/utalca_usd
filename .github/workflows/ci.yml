@@ -69,4 +69,4 @@ jobs:
         with:
           deno-version: v2.x
       - working-directory: supabase/functions
-        run: deno check users-invite/index.ts
+        run: deno check users-invite/index.ts report-bug-notify/index.ts

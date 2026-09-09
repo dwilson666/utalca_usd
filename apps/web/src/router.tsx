@@ -10,6 +10,7 @@ import { InstitutionalDashboard } from './pages/InstitutionalDashboard';
 import { UnitDashboard } from './pages/UnitDashboard';
 import { ActivitiesList } from './pages/ActivitiesList';
 import { ActivityDetail } from './pages/ActivityDetail';
+import { BugReports } from './pages/BugReports';
 import { NoUnit, NotFound, SimplePage, Unauthorized, WizardStub } from './pages/Misc';
 
 function Home() {
@@ -74,6 +75,14 @@ export const router = createBrowserRouter([
         element: (
           <RequirePermission perm="tracking.read.all">
             <SimplePage title="Seguimiento del levantamiento" note="Módulo separado del RAT." />
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'reportes',
+        element: (
+          <RequirePermission perm="institutional.view">
+            <BugReports />
           </RequirePermission>
         ),
       },
