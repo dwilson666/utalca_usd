@@ -50,6 +50,9 @@ select
   (select id from roles where code = 'dpd_admin')    as role_dpd,
   (select id from roles where code = 'superadmin')   as role_super;
 
+-- la suite verifica el comportamiento con MFA EXIGIDO (D1)
+update app_settings set value = 'true'::jsonb where key = 'auth.require_mfa';
+
 -- asignaciones (como postgres, bypassrls; auth.uid() es null → self-guard no aplica)
 insert into user_roles (user_id, role_id, scope) values
   ('00000000-0000-0000-0000-0000000000a1',(select role_jefe  from t_ids),'unit'),

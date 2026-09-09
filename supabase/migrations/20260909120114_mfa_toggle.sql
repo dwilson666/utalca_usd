@@ -14,7 +14,10 @@
 --   (y habilitar TOTP a nivel de proyecto en el dashboard de Supabase).
 -- ════════════════════════════════════════════════════════════════════════════
 
-insert into app_settings (key, value) values ('auth.require_mfa', 'false'::jsonb)
+-- Valor por defecto SEGURO (coincide con D1). La desactivación para la fase de
+-- revisión se hace como decisión operativa sobre el proyecto concreto:
+--   update app_settings set value = 'false' where key = 'auth.require_mfa';
+insert into app_settings (key, value) values ('auth.require_mfa', 'true'::jsonb)
 on conflict (key) do nothing;
 
 -- ¿la sesión cumple el requisito de segundo factor?
