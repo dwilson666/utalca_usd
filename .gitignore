@@ -30,3 +30,6 @@ supabase/.temp/
 # python
 __pycache__/
 *.pyc
+
+# claude code local
+.claude/settings.local.json
