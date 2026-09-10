@@ -11,6 +11,8 @@ import { UnitDashboard } from './pages/UnitDashboard';
 import { ActivitiesList } from './pages/ActivitiesList';
 import { ActivityDetail } from './pages/ActivityDetail';
 import { ActivityWizard } from './pages/ActivityWizard';
+import { ReviewInbox } from './pages/ReviewInbox';
+import { ReviewDetail } from './pages/ReviewDetail';
 import { BugReports } from './pages/BugReports';
 import { NoUnit, NotFound, SimplePage, Unauthorized } from './pages/Misc';
 
@@ -74,7 +76,15 @@ export const router = createBrowserRouter([
         path: 'revision',
         element: (
           <RequirePermission perm="activity.review">
-            <SimplePage title="Bandeja de revisión" note="Cola de actividades EN_REVISION / CORREGIDO." />
+            <ReviewInbox />
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'revision/:id',
+        element: (
+          <RequirePermission perm="activity.review">
+            <ReviewDetail />
           </RequirePermission>
         ),
       },

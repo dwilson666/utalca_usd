@@ -16,6 +16,7 @@ import {
 } from '../lib/queries';
 import { useAuth } from '../auth/AuthProvider';
 import { ActivityStatusPill, PageHeader, QueryState } from '../components/ui';
+import { ObservationItem } from '../components/Observations';
 
 // Qué permiso exige cada transición (espejo de workflow_transitions).
 const TRANSITION_PERM: Record<string, string> = {
@@ -158,18 +159,22 @@ export function ActivityDetail() {
 
               <div className="card" style={{ marginBottom: 12 }}>
                 <div className="card__b">
-                  <div className="eyebrow">Observaciones abiertas</div>
-                  {(obs.data ?? []).filter((o) => !o.resolved_at).length === 0 ? (
+                  <div className="eyebrow">Observaciones</div>
+                  {(obs.data ?? []).length === 0 ? (
                     <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>Ninguna.</p>
                   ) : (
-                    (obs.data ?? [])
-                      .filter((o) => !o.resolved_at)
-                      .map((o) => (
-                        <div key={o.id} style={{ fontSize: 12, marginTop: 8 }}>
-                          <span className="mono">{o.field_path}</span> — {o.text}
-                        </div>
-                      ))
+                    <div style={{ display: 'grid', gap: 8, marginTop: 8 }}>
+                      {(obs.data ?? []).map((o) => (
+                        <ObservationItem key={o.id} o={o} />
+                      ))}
+                    </div>
                   )}
+                  {(a.status === 'OBSERVADO' || a.status === 'CORREGIDO') &&
+                    can(authz, 'activity.update.own_unit') && (
+                      <Link className="btn btn--primary" to={`/actividades/${id}/editar`} style={{ marginTop: 10 }}>
+                        Corregir y reenviar
+                      </Link>
+                    )}
                 </div>
               </div>
 

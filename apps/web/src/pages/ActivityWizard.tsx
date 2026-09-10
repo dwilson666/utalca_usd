@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   EDITABLE_ACTIVITY_STATUS,
   EMPTY_WIZARD_DRAFT,
@@ -22,8 +22,10 @@ import {
   type ActivityMeta,
 } from '../lib/activityApi';
 import { transitionActivity } from '../lib/queries';
+import { fetchObservations, resolveObservation } from '../lib/reviewApi';
 import { clearLocal, readLocal, saveLocal } from '../lib/wizardLocal';
 import { PageHeader } from '../components/ui';
+import { ObservationItem } from '../components/Observations';
 import { STEP_COMPONENTS } from './wizard/steps';
 import type { FieldErrors } from './wizard/fields';
 
@@ -57,9 +59,23 @@ export function ActivityWizard() {
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [restorable, setRestorable] = useState<null | { draft: WizardDraft; step: number }>(null);
   const dirtyRef = useRef(false);
+  const opRef = useRef(false);
 
   const step = WIZARD_STEPS[stepIdx]!;
   const isEditableStatus = !meta || EDITABLE_ACTIVITY_STATUS.has(meta.status);
+  const isCorrection = !!meta && (meta.status === 'OBSERVADO' || meta.status === 'CORREGIDO');
+
+  const obsQ = useQuery({
+    queryKey: ['activity', meta?.id, 'obs'],
+    queryFn: () => fetchObservations(meta!.id),
+    enabled: !!meta && isCorrection,
+  });
+  const openObs = (obsQ.data ?? []).filter((o) => !o.resolved_at);
+  const resolveMut = useMutation({
+    mutationFn: ({ obsId, resolved }: { obsId: string; resolved: boolean }) =>
+      resolveObservation(obsId, resolved),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['activity', meta?.id, 'obs'] }),
+  });
 
   // ── carga ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -219,7 +235,8 @@ export function ActivityWizard() {
   }
 
   async function handleSubmit() {
-    if (!catalogs || busy) return;
+    if (!catalogs || busy || opRef.current) return;
+    opRef.current = true;
     setBusy('submit');
     setSaveError(null);
     try {
@@ -236,14 +253,24 @@ export function ActivityWizard() {
         setBusy(null);
         return;
       }
-      await transitionActivity(activityId, 'EN_REVISION', 'Enviada a revisión desde el asistente');
+      // OBSERVADO → CORREGIDO → EN_REVISION · CORREGIDO → EN_REVISION · resto → EN_REVISION
+      if (meta?.status === 'OBSERVADO') {
+        await transitionActivity(activityId, 'CORREGIDO', 'Correcciones aplicadas desde el asistente');
+      }
+      await transitionActivity(
+        activityId,
+        'EN_REVISION',
+        isCorrection ? 'Reenviada a revisión tras correcciones' : 'Enviada a revisión desde el asistente',
+      );
       dirtyRef.current = false;
       clearLocal(activityId);
       void qc.invalidateQueries({ queryKey: ['activities'] });
+      void qc.invalidateQueries({ queryKey: ['review', 'queue'] });
       nav(`/actividades/${activityId}`);
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'No se pudo enviar a revisión.');
       setBusy(null);
+      opRef.current = false;
     }
   }
 
@@ -306,6 +333,27 @@ export function ActivityWizard() {
           <button className="btn btn--ghost" onClick={() => { if (meta) clearLocal(meta.id); setRestorable(null); }}>
             Descartar
           </button>
+        </div>
+      )}
+
+      {isCorrection && (obsQ.data ?? []).length > 0 && (
+        <div className="card" style={{ marginBottom: 14 }}>
+          <div className="card__h">
+            <h3>Observaciones del DPD</h3>
+            <span className="muted" style={{ fontSize: 12 }}>
+              {openObs.length === 0 ? 'Todas resueltas' : `${openObs.length} sin resolver`}
+            </span>
+          </div>
+          <div className="card__b" style={{ display: 'grid', gap: 8 }}>
+            {(obsQ.data ?? []).map((o) => (
+              <ObservationItem
+                key={o.id}
+                o={o}
+                busy={resolveMut.isPending}
+                onToggle={(resolved) => resolveMut.mutate({ obsId: o.id, resolved })}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -377,8 +425,17 @@ export function ActivityWizard() {
                 {busy === 'next' ? 'Guardando…' : 'Guardar y continuar →'}
               </button>
             ) : (
-              <button className="btn btn--primary" disabled={!!busy} onClick={handleSubmit}>
-                {busy === 'submit' ? 'Enviando…' : 'Enviar a revisión'}
+              <button
+                className="btn btn--primary"
+                disabled={!!busy || (isCorrection && openObs.length > 0)}
+                onClick={handleSubmit}
+                title={isCorrection && openObs.length > 0 ? 'Resuelva las observaciones antes de reenviar' : undefined}
+              >
+                {busy === 'submit'
+                  ? 'Enviando…'
+                  : isCorrection
+                    ? 'Reenviar a revisión'
+                    : 'Enviar a revisión'}
               </button>
             )}
             <span style={{ flex: 1 }} />
