@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ACTIVITY_STATUS_LABEL,
@@ -28,12 +28,19 @@ const TRANSITION_PERM: Record<string, string> = {
   CERRADO: 'activity.close',
 };
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function ActivityDetail() {
   const { id = '' } = useParams();
   const { authz } = useAuth();
   const qc = useQueryClient();
 
-  const act = useQuery({ queryKey: ['activity', id], queryFn: () => fetchActivity(id) });
+  const validId = UUID_RE.test(id);
+  const act = useQuery({
+    queryKey: ['activity', id],
+    queryFn: () => fetchActivity(id),
+    enabled: validId,
+  });
   const history = useQuery({ queryKey: ['activity', id, 'history'], queryFn: () => fetchActivityHistory(id) });
   const obs = useQuery({ queryKey: ['activity', id, 'obs'], queryFn: () => fetchOpenObservations(id) });
 
@@ -57,6 +64,15 @@ export function ActivityDetail() {
     },
   });
 
+  if (!validId || (!act.isLoading && !act.error && !a)) {
+    return (
+      <>
+        <PageHeader title="Actividad no encontrada" sub="El recurso no existe o no está dentro de su alcance." />
+        <Link className="btn" to="/actividades">Volver a actividades</Link>
+      </>
+    );
+  }
+
   return (
     <QueryState isLoading={act.isLoading} error={act.error}>
       {!a ? (
@@ -74,9 +90,9 @@ export function ActivityDetail() {
             }
             actions={
               can(authz, 'activity.update.own_unit') && (
-                <a className="btn" href={`/actividades/${id}/editar`}>
+                <Link className="btn" to={`/actividades/${id}/editar`}>
                   Editar
-                </a>
+                </Link>
               )
             }
           />
