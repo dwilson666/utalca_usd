@@ -1,11 +1,13 @@
 import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ACTIVITY_STATUS, ACTIVITY_STATUS_LABEL, type ActivityStatus } from '@rat/shared';
+import { ACTIVITY_STATUS, ACTIVITY_STATUS_LABEL, can, type ActivityStatus } from '@rat/shared';
 import { fetchActivities } from '../lib/queries';
+import { useAuth } from '../auth/AuthProvider';
 import { ActivityStatusPill, PageHeader, QueryState } from '../components/ui';
 
 export function ActivitiesList() {
+  const { authz } = useAuth();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<ActivityStatus | ''>('');
 
@@ -24,6 +26,13 @@ export function ActivitiesList() {
       <PageHeader
         title="Actividades de tratamiento"
         sub="Solo se listan las actividades de las unidades a las que usted tiene acceso"
+        actions={
+          can(authz, 'activity.create') && (
+            <Link className="btn btn--primary" to="/actividades/nueva">
+              + Nueva actividad
+            </Link>
+          )
+        }
       />
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>

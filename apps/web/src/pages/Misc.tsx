@@ -40,22 +40,6 @@ export function Unauthorized() {
   );
 }
 
-/** Marcador — el asistente de 9 pasos se implementa en el siguiente incremento. */
-export function WizardStub() {
-  return (
-    <>
-      <PageHeader
-        title="Editor de actividad (asistente)"
-        sub="Pendiente — incremento 4a.2. El detalle de solo lectura y las transiciones ya funcionan."
-      />
-      <div className="callout">
-        El formulario tipo wizard de 9 pasos (Fase 3 §5.7) se conecta a las tablas
-        <code> activity_* </code> con validación Zod compartida (<code>@rat/shared</code>).
-      </div>
-    </>
-  );
-}
-
 export function SimplePage({ title, note }: { title: string; note: string }) {
   return (
     <>

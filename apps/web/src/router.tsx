@@ -10,8 +10,9 @@ import { InstitutionalDashboard } from './pages/InstitutionalDashboard';
 import { UnitDashboard } from './pages/UnitDashboard';
 import { ActivitiesList } from './pages/ActivitiesList';
 import { ActivityDetail } from './pages/ActivityDetail';
+import { ActivityWizard } from './pages/ActivityWizard';
 import { BugReports } from './pages/BugReports';
-import { NoUnit, NotFound, SimplePage, Unauthorized, WizardStub } from './pages/Misc';
+import { NoUnit, NotFound, SimplePage, Unauthorized } from './pages/Misc';
 
 function Home() {
   const { authz, loading } = useAuth();
@@ -52,8 +53,23 @@ export const router = createBrowserRouter([
         ),
       },
       { path: 'actividades', element: <ActivitiesList /> },
+      {
+        path: 'actividades/nueva',
+        element: (
+          <RequirePermission perm="activity.create">
+            <ActivityWizard />
+          </RequirePermission>
+        ),
+      },
       { path: 'actividades/:id', element: <ActivityDetail /> },
-      { path: 'actividades/:id/editar', element: <WizardStub /> },
+      {
+        path: 'actividades/:id/editar',
+        element: (
+          <RequirePermission perm="activity.update.own_unit">
+            <ActivityWizard />
+          </RequirePermission>
+        ),
+      },
       {
         path: 'revision',
         element: (

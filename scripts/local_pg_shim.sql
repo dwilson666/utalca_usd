@@ -22,6 +22,10 @@ begin
 end $$;
 grant anon, authenticated, service_role to postgres;
 grant usage on schema extensions to anon, authenticated, service_role;
+-- En Supabase el esquema public ya concede USAGE a estos roles; al recrear
+-- public en un PostgreSQL vanilla hay que reponerlo (si no, RLS ve "no existe").
+grant usage on schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant usage, select on sequences to authenticated;
 
 create table if not exists auth.users (
   id                 uuid primary key default gen_random_uuid(),

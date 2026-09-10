@@ -81,3 +81,27 @@ export const WIZARD_STEPS = [
   { n: 8, key: 'seguridad', label: 'Seguridad' },
   { n: 9, key: 'revision', label: 'Revisión' },
 ] as const;
+
+export type WizardStepKey = (typeof WIZARD_STEPS)[number]['key'];
+
+/** Pasos que aportan campos obligatorios (el 9 es solo resumen). */
+export const WIZARD_DATA_STEPS: WizardStepKey[] = [
+  'identificacion',
+  'finalidad',
+  'titulares',
+  'base_juridica',
+  'destinatarios',
+  'conservacion',
+  'automatizacion',
+  'seguridad',
+];
+
+export const RETENTION_UNITS = ['dias', 'meses', 'anios', 'indefinido'] as const;
+export type RetentionUnit = (typeof RETENTION_UNITS)[number];
+
+export const RETENTION_UNIT_LABEL: Record<RetentionUnit, string> = {
+  dias: 'días',
+  meses: 'meses',
+  anios: 'años',
+  indefinido: 'indefinido',
+};
