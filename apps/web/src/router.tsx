@@ -15,11 +15,13 @@ import { ReviewInbox } from './pages/ReviewInbox';
 import { ReviewDetail } from './pages/ReviewDetail';
 import { Tracking } from './pages/Tracking';
 import { ImportPage } from './pages/Import';
+import { Audit } from './pages/Audit';
+import { RatReport } from './pages/RatReport';
 import { BugReports } from './pages/BugReports';
 import { AdminUsers } from './pages/admin/Users';
 import { AdminCatalogs } from './pages/admin/Catalogs';
 import { AdminUnits } from './pages/admin/Units';
-import { NoUnit, NotFound, SimplePage, Unauthorized } from './pages/Misc';
+import { NoUnit, NotFound, Unauthorized } from './pages/Misc';
 
 function Home() {
   const { authz, loading } = useAuth();
@@ -97,7 +99,15 @@ export const router = createBrowserRouter([
         path: 'auditoria',
         element: (
           <RequirePermission perm="audit.read">
-            <SimplePage title="Consola de auditoría" note="Registro inmutable." />
+            <Audit />
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'reporte',
+        element: (
+          <RequirePermission perm="export.execute">
+            <RatReport />
           </RequirePermission>
         ),
       },

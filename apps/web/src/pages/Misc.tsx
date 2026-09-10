@@ -39,12 +39,3 @@ export function Unauthorized() {
     </>
   );
 }
-
-export function SimplePage({ title, note }: { title: string; note: string }) {
-  return (
-    <>
-      <PageHeader title={title} sub={note} />
-      <div className="callout">Módulo pendiente en este incremento.</div>
-    </>
-  );
-}

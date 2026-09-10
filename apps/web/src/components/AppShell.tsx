@@ -60,6 +60,9 @@ export function AppShell() {
         {can(authz, 'audit.read') && (
           <NavLink to="/auditoria" className={navcls} onClick={closeMenu}>Auditoría</NavLink>
         )}
+        {can(authz, 'export.execute') && (
+          <NavLink to="/reporte" className={navcls} onClick={closeMenu}>Reporte / Exportar</NavLink>
+        )}
         {can(authz, 'tracking.read.all') && (
           <NavLink to="/seguimiento" className={navcls} onClick={closeMenu}>Seguimiento</NavLink>
         )}

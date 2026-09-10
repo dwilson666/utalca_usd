@@ -12,6 +12,7 @@ import {
   fetchActivity,
   fetchActivityHistory,
   fetchOpenObservations,
+  fetchVersionDiff,
   transitionActivity,
 } from '../lib/queries';
 import { useAuth } from '../auth/AuthProvider';
@@ -181,12 +182,7 @@ export function ActivityDetail() {
               <div className="card">
                 <div className="card__b">
                   <div className="eyebrow">Versiones</div>
-                  {(history.data ?? []).map((v) => (
-                    <div key={v.id} style={{ fontSize: 12, marginTop: 6 }}>
-                      <span className="mono">v{v.version_no}</span> · {v.reason} ·{' '}
-                      {new Date(v.created_at).toLocaleDateString('es-CL')}
-                    </div>
-                  ))}
+                  <VersionHistory id={id} versions={history.data ?? []} />
                 </div>
               </div>
             </div>
@@ -194,6 +190,70 @@ export function ActivityDetail() {
         </>
       )}
     </QueryState>
+  );
+}
+
+function VersionHistory({
+  id,
+  versions,
+}: {
+  id: string;
+  versions: Array<{ id: string; version_no: number; reason: string; created_at: string }>;
+}) {
+  const [pair, setPair] = useState<[number, number] | null>(null);
+  const diff = useQuery({
+    queryKey: ['activity', id, 'diff', pair?.[0], pair?.[1]],
+    queryFn: () => fetchVersionDiff(id, pair![0], pair![1]),
+    enabled: !!pair,
+  });
+
+  const REASON: Record<string, string> = { submit: 'envío a revisión', approve: 'aprobación', manual: 'guardado manual', restore: 'restauración' };
+
+  if (versions.length === 0) return <p className="muted" style={{ fontSize: 12, marginTop: 8 }}>Sin versiones aún.</p>;
+
+  return (
+    <div style={{ marginTop: 6 }}>
+      {versions.map((v, i) => {
+        const prev = versions[i + 1];
+        return (
+          <div key={v.id} style={{ fontSize: 12, marginTop: 6, display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+            <span className="mono">v{v.version_no}</span>
+            <span className="muted">{REASON[v.reason] ?? v.reason} · {new Date(v.created_at).toLocaleDateString('es-CL')}</span>
+            {prev && (
+              <button
+                className="btn btn--ghost"
+                style={{ fontSize: 11, padding: '1px 6px' }}
+                onClick={() => setPair(pair && pair[0] === prev.version_no && pair[1] === v.version_no ? null : [prev.version_no, v.version_no])}
+              >
+                {pair && pair[0] === prev.version_no && pair[1] === v.version_no ? 'ocultar' : `↔ v${prev.version_no}`}
+              </button>
+            )}
+          </div>
+        );
+      })}
+
+      {pair && (
+        <div style={{ marginTop: 8, borderTop: '1px solid var(--border)', paddingTop: 8, fontSize: 12 }}>
+          <b>v{pair[0]} → v{pair[1]}</b>
+          {diff.isLoading && <p className="muted">Comparando…</p>}
+          {diff.data && diff.data.scalar.length === 0 && diff.data.collections.length === 0 && (
+            <p className="muted">Sin cambios en los campos comparados.</p>
+          )}
+          {diff.data?.scalar.map((c) => (
+            <div key={c.field} style={{ marginTop: 4 }}>
+              <span className="muted">{c.field}: </span>
+              <span style={{ textDecoration: 'line-through', opacity: 0.6 }}>{String(c.a ?? '—')}</span>{' → '}
+              <b>{String(c.b ?? '—')}</b>
+            </div>
+          ))}
+          {diff.data?.collections.map((c) => (
+            <div key={c.name} style={{ marginTop: 4 }}>
+              <span className="muted">{c.name}: </span>{c.a} → <b>{c.b}</b> ítem(s)
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

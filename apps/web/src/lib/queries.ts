@@ -117,6 +117,55 @@ export async function fetchOpenObservations(activityId: string) {
   return data ?? [];
 }
 
+export interface VersionDiff {
+  scalar: Array<{ field: string; a: unknown; b: unknown }>;
+  collections: Array<{ name: string; a: number; b: number }>;
+}
+
+const DIFF_SCALAR_FIELDS: Record<string, string> = {
+  title: 'Nombre',
+  purpose: 'Finalidad',
+  description: 'Descripción',
+  data_source: 'Origen de los datos',
+  operational_owner_name: 'Responsable interno',
+  retention_text: 'Conservación',
+  retention_criterion_id: 'Criterio de conservación',
+  has_international_transfer: 'Transferencia internacional',
+  has_automated_decision: 'Decisiones automatizadas',
+  uses_ai: 'Uso de IA',
+  own_systems_text: 'Sistemas propios',
+};
+
+const DIFF_COLLECTIONS: Record<string, string> = {
+  legal_bases: 'Bases de licitud',
+  data_categories: 'Categorías de datos',
+  subject_categories: 'Categorías de titulares',
+  recipients: 'Destinatarios',
+  transfers: 'Transferencias',
+  security_measures: 'Medidas de seguridad',
+  automated_decisions: 'Decisiones automatizadas',
+};
+
+/** Compara dos versiones de una actividad (usa el RPC diff_activity_versions). */
+export async function fetchVersionDiff(activityId: string, a: number, b: number): Promise<VersionDiff> {
+  const { data, error } = await supabase.rpc('diff_activity_versions', {
+    p_activity: activityId,
+    p_a: a,
+    p_b: b,
+  });
+  if (error) throw error;
+  const snap = data as { a: any; b: any };
+  const actA = snap.a?.activity ?? {};
+  const actB = snap.b?.activity ?? {};
+  const scalar = Object.entries(DIFF_SCALAR_FIELDS)
+    .filter(([f]) => JSON.stringify(actA[f] ?? null) !== JSON.stringify(actB[f] ?? null))
+    .map(([field]) => ({ field: DIFF_SCALAR_FIELDS[field]!, a: actA[field], b: actB[field] }));
+  const collections = Object.entries(DIFF_COLLECTIONS)
+    .map(([key, name]) => ({ name, a: (snap.a?.[key] ?? []).length, b: (snap.b?.[key] ?? []).length }))
+    .filter((c) => c.a !== c.b);
+  return { scalar, collections };
+}
+
 export async function transitionActivity(activityId: string, to: ActivityStatus, comment?: string) {
   const { data, error } = await supabase.rpc('set_activity_status', {
     p_activity: activityId,

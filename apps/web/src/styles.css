@@ -295,3 +295,16 @@ table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
 @media (prefers-reduced-motion: reduce) {
   .sidebar, .sidebar-scrim { transition: none; }
 }
+
+/* ───────── impresión / PDF ───────── */
+@media print {
+  :root { color-scheme: light; }
+  body { background: #fff; color: #000; }
+  .sidebar, .sidebar-scrim, .topbar, .navtoggle, .no-print, .btn { display: none !important; }
+  .shell { display: block; }
+  .main { padding: 0; max-width: none; }
+  .card, section { box-shadow: none !important; border-color: #ccc !important; }
+  .printable { font-size: 11px; }
+  a { color: #000; text-decoration: none; }
+  section { break-inside: avoid; }
+}
