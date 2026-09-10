@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { can, ROLE_LABELS, type RoleCode } from '@rat/shared';
 import { useAuth } from '../auth/AuthProvider';
 import { BugButton } from './BugButton';
@@ -10,62 +11,98 @@ export function AppShell() {
   const { authz, session, signOut } = useAuth();
   const institutional = can(authz, 'institutional.view');
   const roleLabel = deriveRoleLabel(authz);
+  const loc = useLocation();
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = () => setMenuOpen(false);
+
+  // cerrar el cajón al navegar y con la tecla Escape
+  useEffect(() => setMenuOpen(false), [loc.pathname]);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
 
   return (
     <div className="shell">
-      <aside className="sidebar">
+      <div
+        className={`sidebar-scrim${menuOpen ? ' is-open' : ''}`}
+        onClick={closeMenu}
+        aria-hidden
+      />
+
+      <aside className={`sidebar${menuOpen ? ' is-open' : ''}`} id="nav-cajon">
         <div className="brand">
           <AppMark />
         </div>
 
         {institutional && (
-          <NavLink to="/institucional" className={navcls}>
+          <NavLink to="/institucional" className={navcls} onClick={closeMenu}>
             Tablero institucional
           </NavLink>
         )}
 
         {authz.units.length > 0 && <div className="grp">Mis unidades</div>}
         {authz.units.map((u) => (
-          <NavLink key={u.unit_id} to={`/unidad/${u.unit_id}`} className={navcls}>
+          <NavLink key={u.unit_id} to={`/unidad/${u.unit_id}`} className={navcls} onClick={closeMenu}>
             {u.name}
             {u.unit_role === 'jefe' && <span className="muted"> · jefe</span>}
           </NavLink>
         ))}
 
         <div className="grp">RAT</div>
-        <NavLink to="/actividades" className={navcls}>Actividades</NavLink>
+        <NavLink to="/actividades" className={navcls} onClick={closeMenu}>Actividades</NavLink>
         {can(authz, 'activity.review') && (
-          <NavLink to="/revision" className={navcls}>Revisión</NavLink>
+          <NavLink to="/revision" className={navcls} onClick={closeMenu}>Revisión</NavLink>
         )}
-        {can(authz, 'audit.read') && <NavLink to="/auditoria" className={navcls}>Auditoría</NavLink>}
+        {can(authz, 'audit.read') && (
+          <NavLink to="/auditoria" className={navcls} onClick={closeMenu}>Auditoría</NavLink>
+        )}
         {can(authz, 'tracking.read.all') && (
-          <NavLink to="/seguimiento" className={navcls}>Seguimiento</NavLink>
+          <NavLink to="/seguimiento" className={navcls} onClick={closeMenu}>Seguimiento</NavLink>
         )}
         {authz.institutional && (
-          <NavLink to="/reportes" className={navcls}>Reportes de errores</NavLink>
+          <NavLink to="/reportes" className={navcls} onClick={closeMenu}>Reportes de errores</NavLink>
         )}
 
         {can(authz, 'user.manage') && (
           <>
             <div className="grp">Administración</div>
-            <NavLink to="/admin/usuarios" className={navcls}>Usuarios y roles</NavLink>
+            <NavLink to="/admin/usuarios" className={navcls} onClick={closeMenu}>Usuarios y roles</NavLink>
             {can(authz, 'unit.manage') && (
-              <NavLink to="/admin/unidades" className={navcls}>Unidades</NavLink>
+              <NavLink to="/admin/unidades" className={navcls} onClick={closeMenu}>Unidades</NavLink>
             )}
             {can(authz, 'config.manage') && (
-              <NavLink to="/admin/catalogos" className={navcls}>Catálogos</NavLink>
+              <NavLink to="/admin/catalogos" className={navcls} onClick={closeMenu}>Catálogos</NavLink>
             )}
           </>
         )}
+
+        <div className="sidebar-foot">
+          <span className="grp" style={{ padding: '0 0 6px' }}>Tema</span>
+          <ThemeToggle />
+        </div>
       </aside>
 
       <div>
         <div className="topbar">
+          <button
+            type="button"
+            className="navtoggle"
+            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={menuOpen}
+            aria-controls="nav-cajon"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            {menuOpen ? '✕' : '☰'}
+          </button>
           <span className="rolebadge">{roleLabel}</span>
           <div className="spacer" />
           <ThemeToggle />
           <BugButton />
-          <span className="muted mono" style={{ fontSize: 12 }}>{session?.user.email}</span>
+          <span className="topbar-email mono">{session?.user.email}</span>
           <button className="btn btn--ghost" onClick={() => void signOut()}>
             Cerrar sesión
           </button>

@@ -89,7 +89,7 @@ export function ReviewDetail() {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 22, alignItems: 'start' }}>
+          <div className="split">
             <RatReadView a={a} />
 
             <div style={{ display: 'grid', gap: 14 }}>

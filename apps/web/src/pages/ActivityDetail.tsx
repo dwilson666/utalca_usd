@@ -105,7 +105,7 @@ export function ActivityDetail() {
               </div>
             )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 260px', gap: 24, alignItems: 'start' }}>
+          <div className="split split--aside-narrow">
             <div style={{ display: 'grid', gap: 10 }}>
               <Section title="Finalidad y tratamiento">
                 <KV k="Finalidad" v={a.purpose} />

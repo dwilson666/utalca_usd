@@ -357,9 +357,9 @@ export function ActivityWizard() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '210px 1fr', gap: 22, alignItems: 'start' }}>
+      <div className="split split--wizard">
         {/* navegación de pasos */}
-        <nav className="card" style={{ padding: 8, position: 'sticky', top: 12 }}>
+        <nav className="card wizard-nav" style={{ padding: 8 }}>
           <div style={{ padding: '6px 8px 10px' }}>
             <div className="bar" style={{ height: 6 }}>
               <i style={{ width: `${progressPct}%` }} />

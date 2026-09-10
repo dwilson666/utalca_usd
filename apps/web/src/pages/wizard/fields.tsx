@@ -105,19 +105,17 @@ export function CheckList({
   options,
   selected,
   onToggle,
-  columns = 2,
 }: {
   options: Option[];
   selected: string[];
   onToggle: (id: string) => void;
-  columns?: number;
 }) {
   const set = new Set(selected);
   return (
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${columns}, minmax(0,1fr))`,
+        gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))',
         gap: 6,
       }}
     >
