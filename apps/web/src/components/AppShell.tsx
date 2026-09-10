@@ -63,6 +63,9 @@ export function AppShell() {
         {can(authz, 'tracking.read.all') && (
           <NavLink to="/seguimiento" className={navcls} onClick={closeMenu}>Seguimiento</NavLink>
         )}
+        {can(authz, 'import.execute') && (
+          <NavLink to="/importacion" className={navcls} onClick={closeMenu}>Importación</NavLink>
+        )}
         {authz.institutional && (
           <NavLink to="/reportes" className={navcls} onClick={closeMenu}>Reportes de errores</NavLink>
         )}

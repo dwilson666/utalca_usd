@@ -96,6 +96,26 @@ export const WIZARD_DATA_STEPS: WizardStepKey[] = [
   'seguridad',
 ];
 
+// ── seguimiento del levantamiento (módulo separado del RAT) ─────────────────
+export const ENGAGEMENT_STAGES = [
+  'no_contactada',
+  'contactada',
+  'agendada',
+  'reunion_realizada',
+  'en_seguimiento',
+  'levantamiento_completo',
+] as const;
+export type EngagementStage = (typeof ENGAGEMENT_STAGES)[number];
+
+export const ENGAGEMENT_STAGE_LABEL: Record<EngagementStage, string> = {
+  no_contactada: 'No contactada',
+  contactada: 'Contactada',
+  agendada: 'Reunión agendada',
+  reunion_realizada: 'Reunión realizada',
+  en_seguimiento: 'En seguimiento',
+  levantamiento_completo: 'Levantamiento completo',
+};
+
 export const RETENTION_UNITS = ['dias', 'meses', 'anios', 'indefinido'] as const;
 export type RetentionUnit = (typeof RETENTION_UNITS)[number];
 

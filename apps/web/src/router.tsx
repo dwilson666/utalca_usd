@@ -13,6 +13,8 @@ import { ActivityDetail } from './pages/ActivityDetail';
 import { ActivityWizard } from './pages/ActivityWizard';
 import { ReviewInbox } from './pages/ReviewInbox';
 import { ReviewDetail } from './pages/ReviewDetail';
+import { Tracking } from './pages/Tracking';
+import { ImportPage } from './pages/Import';
 import { BugReports } from './pages/BugReports';
 import { AdminUsers } from './pages/admin/Users';
 import { AdminCatalogs } from './pages/admin/Catalogs';
@@ -103,7 +105,15 @@ export const router = createBrowserRouter([
         path: 'seguimiento',
         element: (
           <RequirePermission perm="tracking.read.all">
-            <SimplePage title="Seguimiento del levantamiento" note="Módulo separado del RAT." />
+            <Tracking />
+          </RequirePermission>
+        ),
+      },
+      {
+        path: 'importacion',
+        element: (
+          <RequirePermission perm="import.execute">
+            <ImportPage />
           </RequirePermission>
         ),
       },
