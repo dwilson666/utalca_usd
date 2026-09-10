@@ -14,6 +14,9 @@ import { ActivityWizard } from './pages/ActivityWizard';
 import { ReviewInbox } from './pages/ReviewInbox';
 import { ReviewDetail } from './pages/ReviewDetail';
 import { BugReports } from './pages/BugReports';
+import { AdminUsers } from './pages/admin/Users';
+import { AdminCatalogs } from './pages/admin/Catalogs';
+import { AdminUnits } from './pages/admin/Units';
 import { NoUnit, NotFound, SimplePage, Unauthorized } from './pages/Misc';
 
 function Home() {
@@ -116,7 +119,7 @@ export const router = createBrowserRouter([
         path: 'admin/usuarios',
         element: (
           <RequirePermission perm="user.manage">
-            <SimplePage title="Usuarios y roles" note="Alta por invitación (Edge Function users-invite)." />
+            <AdminUsers />
           </RequirePermission>
         ),
       },
@@ -124,7 +127,7 @@ export const router = createBrowserRouter([
         path: 'admin/unidades',
         element: (
           <RequirePermission perm="unit.manage">
-            <SimplePage title="Unidades" note="Árbol organizacional · nodos por revisar." />
+            <AdminUnits />
           </RequirePermission>
         ),
       },
@@ -132,7 +135,7 @@ export const router = createBrowserRouter([
         path: 'admin/catalogos',
         element: (
           <RequirePermission perm="config.manage">
-            <SimplePage title="Catálogos" note="Vocabularios controlados." />
+            <AdminCatalogs />
           </RequirePermission>
         ),
       },
