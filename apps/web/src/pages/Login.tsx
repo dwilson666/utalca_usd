@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 import { supabase } from '../lib/supabase';
+import { Wordmark } from '../components/Logo';
 
 const DOMAIN = '@utalca.cl';
 
@@ -42,6 +43,9 @@ export function Login() {
   return (
     <div className="authwrap">
       <form className="authcard" onSubmit={submit}>
+        <div className="authbrand">
+          <Wordmark size={38} />
+        </div>
         <h2 style={{ fontSize: 19, marginBottom: 4 }}>Iniciar sesión</h2>
         <p className="muted" style={{ fontSize: 13, marginTop: 0, marginBottom: 20 }}>
           Acceso exclusivo con cuenta institucional. Esta plataforma trata datos personales bajo la

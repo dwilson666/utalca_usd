@@ -2,6 +2,8 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { can, ROLE_LABELS, type RoleCode } from '@rat/shared';
 import { useAuth } from '../auth/AuthProvider';
 import { BugButton } from './BugButton';
+import { ThemeToggle } from './ThemeToggle';
+import { AppMark } from './Logo';
 
 /** Sin selector de rol (D13): el rol y la vista se derivan del usuario autenticado. */
 export function AppShell() {
@@ -13,11 +15,7 @@ export function AppShell() {
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="mark">R</div>
-          <div>
-            <b style={{ display: 'block' }}>RAT</b>
-            <span style={{ fontSize: 11, color: 'rgba(233,238,244,.65)' }}>Universidad de Talca</span>
-          </div>
+          <AppMark />
         </div>
 
         {institutional && (
@@ -65,6 +63,7 @@ export function AppShell() {
         <div className="topbar">
           <span className="rolebadge">{roleLabel}</span>
           <div className="spacer" />
+          <ThemeToggle />
           <BugButton />
           <span className="muted mono" style={{ fontSize: 12 }}>{session?.user.email}</span>
           <button className="btn btn--ghost" onClick={() => void signOut()}>

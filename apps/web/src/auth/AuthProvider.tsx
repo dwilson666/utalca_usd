@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import type { Session } from '@supabase/supabase-js';
 import { EMPTY_AUTHZ, type MyAuthz } from '@rat/shared';
 import { supabase } from '../lib/supabase';
+import { setInstitutionalDefault, type ThemeChoice } from '../lib/theme';
 
 type MfaState = 'unknown' | 'not_required' | 'not_enrolled' | 'needs_challenge' | 'verified';
 const SATISFIED: MfaState[] = ['verified', 'not_required'];
@@ -18,16 +19,23 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-let mfaRequiredCache: boolean | null = null;
-async function mfaRequired(): Promise<boolean> {
-  if (mfaRequiredCache !== null) return mfaRequiredCache;
+interface AuthPolicy {
+  require_mfa?: boolean;
+  ui_default_theme?: ThemeChoice;
+}
+let policyCache: AuthPolicy | null = null;
+async function loadPolicy(): Promise<AuthPolicy> {
+  if (policyCache !== null) return policyCache;
   try {
     const { data } = await supabase.rpc('auth_policy');
-    mfaRequiredCache = (data as { require_mfa?: boolean } | null)?.require_mfa !== false;
+    policyCache = (data as AuthPolicy | null) ?? {};
   } catch {
-    mfaRequiredCache = true;
+    policyCache = {};
   }
-  return mfaRequiredCache;
+  return policyCache;
+}
+async function mfaRequired(): Promise<boolean> {
+  return (await loadPolicy()).require_mfa !== false;
 }
 
 async function readMfaState(): Promise<MfaState> {
@@ -53,6 +61,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [mfa, setMfa] = useState<MfaState>('unknown');
   const [authz, setAuthz] = useState<MyAuthz>(EMPTY_AUTHZ);
+
+  useEffect(() => {
+    // Predeterminado institucional de tema (la elección individual manda por encima).
+    void loadPolicy().then((p) => {
+      if (p.ui_default_theme) setInstitutionalDefault(p.ui_default_theme);
+    });
+  }, []);
 
   useEffect(() => {
     let alive = true;
